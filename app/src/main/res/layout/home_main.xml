@@ -12,19 +12,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.25" />
+        app:layout_constraintGuide_percent="0.3" />
 
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:foreground="#55222f3e"
+        android:foregroundTintMode="src_atop"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.49"
+        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/dash" />
 
     <ImageButton
@@ -32,7 +34,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/back_btn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -45,6 +47,56 @@
         app:barrierDirection="top"
         tools:layout_editor_absoluteX="196dp"
         tools:layout_editor_absoluteY="292dp" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/coda"
+        android:gravity="center"
+        android:text="Only the best hand selected wallpapers"
+        android:textColor="@color/white"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/editTextTextPersonName"
+        app:layout_constraintTop_toBottomOf="@+id/imageButton2" />
+
+    <EditText
+        android:id="@+id/editTextTextPersonName"
+        android:layout_width="wrap_content"
+        android:layout_height="36sp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/search"
+        android:drawableLeft="@drawable/ic_baseline_search_24"
+        android:drawablePadding="8dp"
+        android:ems="10"
+        android:fontFamily="@font/coda"
+        android:inputType="textPersonName"
+        android:paddingLeft="8dp"
+        android:paddingRight="16dp"
+        android:text="Enter keywords"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="-24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@drawable/rounded_shape"
+        app:layout_constraintTop_toTopOf="@+id/guideline2">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="24dp"
+            android:text="dhuski chandan"></TextView>
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
