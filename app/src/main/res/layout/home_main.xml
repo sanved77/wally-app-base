@@ -30,7 +30,7 @@
         app:srcCompat="@drawable/dash" />
 
     <ImageButton
-        android:id="@+id/imageButton2"
+        android:id="@+id/menuBtn1"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="24dp"
@@ -52,14 +52,15 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/coda"
         android:gravity="center"
         android:text="Only the best hand selected wallpapers"
         android:textColor="@color/white"
         android:textSize="26sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/editTextTextPersonName"
-        app:layout_constraintTop_toBottomOf="@+id/imageButton2" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/menuBtn1" />
 
     <EditText
         android:id="@+id/editTextTextPersonName"
@@ -70,11 +71,10 @@
         android:drawableLeft="@drawable/ic_baseline_search_24"
         android:drawablePadding="8dp"
         android:ems="10"
-        android:fontFamily="@font/coda"
         android:inputType="textPersonName"
         android:paddingLeft="8dp"
         android:paddingRight="16dp"
-        android:text="Enter keywords"
+        android:hint="Enter keywords"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,6 +85,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="-24dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -94,8 +95,27 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="24dp"
-            android:text="dhuski chandan"></TextView>
+            android:paddingLeft="24dp"
+            android:paddingTop="24dp"
+            android:textSize="24sp"
+            android:text="Popular"></TextView>
+
+        <TextView
+            android:id="@+id/pasteView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="24dp"
+            android:paddingTop="24dp"
+            android:textSize="24sp"
+            android:text="testing"></TextView>
+
+        <ImageView
+            android:id="@+id/ivTest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </ImageView>
+
     </LinearLayout>
 
 
