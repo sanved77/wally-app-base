@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SuperWallpapers</string>
+    // TODO Change the title
+    <string name="collection">testy</string>
 </resources>
