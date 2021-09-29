@@ -1,9 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.SuperWallpapers" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@android:color/white</item>
-        <item name="colorPrimaryDark">@android:color/white</item>
-        <item name="colorAccent">#45a713</item>
+    <style name="Theme.SuperWallpapers" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@null</item>
+        <item name="colorPrimaryDark">@null</item>
+        <item name="colorAccent">@null</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="fontFamily">@font/coda</item>
     </style>

@@ -2,4 +2,6 @@
     <string name="app_name">SuperWallpapers</string>
     // TODO Change the title
     <string name="collection">testy</string>
+    <string name="popularLabel">Popular &#128293;</string>
+    <string name="categoryLabel">Categories &#x1F4AF;</string>
 </resources>
