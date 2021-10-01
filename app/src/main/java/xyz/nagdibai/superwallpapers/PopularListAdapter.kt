@@ -15,6 +15,7 @@ import com.bumptech.glide.request.RequestOptions
 import xyz.nagdibai.superwallpapers.R
 import xyz.nagdibai.superwallpapers.LEFT
 import xyz.nagdibai.superwallpapers.RIGHT
+import xyz.nagdibai.superwallpapers.applyPadding
 
 
 internal class PopularListAdapter(private var itemsList: List<String>, private var context: Context, private var height: Int) :
@@ -35,8 +36,8 @@ internal class PopularListAdapter(private var itemsList: List<String>, private v
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val item = itemsList?.get(position)
         when (position) {
-            0 -> applyPadding(holder, LEFT)
-            (itemCount - 1) -> applyPadding(holder, RIGHT)
+            0 -> applyPadding(context, holder.param, LEFT)
+            (itemCount - 1) -> applyPadding(context, holder.param, RIGHT)
         }
         holder.popItemCard.getLayoutParams().height = height
         holder.popItemCard.getLayoutParams().width = holder.width
@@ -46,14 +47,5 @@ internal class PopularListAdapter(private var itemsList: List<String>, private v
     }
     override fun getItemCount(): Int {
         return itemsList?.size
-    }
-
-    fun applyPadding(holder: MyViewHolder, side: Int) {
-        var dpRatio = context.getResources().getDisplayMetrics().density;
-        when (side) {
-            LEFT -> holder.param.setMargins((16 * dpRatio).toInt(),0,(4 * dpRatio).toInt(),0)
-            RIGHT -> holder.param.setMargins((4 * dpRatio).toInt(),0,(8 * dpRatio).toInt(),0)
-        }
-        holder.popItemCard.layoutParams = holder.param
     }
 }

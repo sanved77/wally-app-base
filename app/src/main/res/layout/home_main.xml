@@ -37,7 +37,7 @@
         android:layout_height="48dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="32dp"
-        android:background="@drawable/back_btn"
+        android:background="@drawable/top_left_nav_btn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_menu_24" />
@@ -181,6 +181,7 @@
 <!--            app:layout_constraintTop_toBottomOf="@+id/rvCategories" />-->
 
         <FrameLayout
+            android:id="@+id/btnSavedWallpapers"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/button_purple"

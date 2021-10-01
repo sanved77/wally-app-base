@@ -1,15 +1,9 @@
 package xyz.nagdibai.superwallpapers
 
-import android.graphics.Color
-import android.os.Build
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-import android.view.WindowManager
 import android.widget.Toast
-import androidx.core.view.WindowCompat
 import androidx.core.view.doOnLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private val categoryItemsList = ArrayList<CategoryListItem>()
     private lateinit var popularListAdapter: PopularListAdapter
     private lateinit var categoryListAdapter: CategoryListAdapter
+    private var categoryMap = HashMap<String, ArrayList<String>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,20 +53,25 @@ class MainActivity : AppCompatActivity() {
         val rvCategories: RecyclerView = bnd.rvCategories;
         rvCategories.doOnLayout {
             imgHeight = it.measuredHeight
-            categoryListAdapter = CategoryListAdapter(categoryItemsList, this, imgHeight)
+            categoryListAdapter = CategoryListAdapter(categoryItemsList, categoryMap, this, imgHeight)
             rvCategories.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
             rvCategories.adapter = categoryListAdapter
         }
 
         // Grabbing data
-        getCurrentData()
+        grabThemWallpapers()
 
         bnd.menuBtn.setOnClickListener {
             rvPopular.layoutParams;
         }
+        bnd.btnSavedWallpapers.setOnClickListener {
+            val intent = Intent(this, Shelf::class.java)
+            intent.putExtra("SamaanPani",popularItemsList)
+            startActivity(intent)
+        }
     }
 
-    private fun getCurrentData() {
+    private fun grabThemWallpapers() {
 
         val api = Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -87,7 +87,6 @@ class MainActivity : AppCompatActivity() {
                     val data = response.body()!!
 
                     var popularSorted = data.sortedWith(compareBy {it.downloads}).asReversed()
-                    val categoryMap = HashMap<String, ArrayList<String>>()
 
                     withContext(Dispatchers.Main) {
                         for (i in data.indices) {
@@ -121,33 +120,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) hideSystemUI()
-    }
-
-    private fun hideSystemUI() {
-        // Enables regular immersive mode
-        if (Build.VERSION.SDK_INT in 21..29) {
-            window.statusBarColor = Color.TRANSPARENT
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.decorView.systemUiVisibility =
-                SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or SYSTEM_UI_FLAG_LAYOUT_STABLE
-
-        } else if (Build.VERSION.SDK_INT >= 30) {
-            window.statusBarColor = Color.TRANSPARENT
-            // Making status bar overlaps with the activity
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-        }
-
-        // List Image size presets
-        var imgH: Int = 0
-
-    }
-
-    // Shows the system bars by removing all the flags
-    private fun showSystemUI() {
-        window.decorView.systemUiVisibility = (SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+        if (hasFocus) hideSystemUI(window)
     }
 }

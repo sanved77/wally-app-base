@@ -1,3 +1,5 @@
 package xyz.nagdibai.superwallpapers
 
-data class CategoryListItem(val label: String, val thumbLink: String)
+import java.io.Serializable
+
+data class CategoryListItem(val label: String, val link: String) : Serializable

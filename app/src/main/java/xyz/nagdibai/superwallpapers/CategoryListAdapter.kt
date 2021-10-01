@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,19 +11,21 @@ import androidx.annotation.NonNull
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import xyz.nagdibai.superwallpapers.CategoryListItem
-import xyz.nagdibai.superwallpapers.LEFT
-import xyz.nagdibai.superwallpapers.RIGHT
-import xyz.nagdibai.superwallpapers.R
+import xyz.nagdibai.superwallpapers.*
 
 
-internal class CategoryListAdapter(private var itemsList: List<CategoryListItem>, private var context: Context, private var height: Int) :
+internal class CategoryListAdapter(
+    private var itemsList: List<CategoryListItem>,
+    private var categoryMap: HashMap<String, ArrayList<String>>,
+    private var context: Context,
+    private var height: Int
+) :
     RecyclerView.Adapter<CategoryListAdapter.MyViewHolder>() {
     internal inner class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var itemImageView: ImageView = view.findViewById(R.id.ivPopListItem)
-        var popItemCard: CardView = view.findViewById(R.id.popItemCard)
+        var catItemCard: CardView = view.findViewById(R.id.catItemCard)
         var tvLabel: TextView = view.findViewById(R.id.tvLabel)
-        val param = popItemCard.layoutParams as ViewGroup.MarginLayoutParams
+        val param = catItemCard.layoutParams as ViewGroup.MarginLayoutParams
         val width = (height/16)*9
     }
     @NonNull
@@ -34,26 +37,24 @@ internal class CategoryListAdapter(private var itemsList: List<CategoryListItem>
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val item = itemsList?.get(position)
         when (position) {
-            0 -> applyPadding(holder, LEFT)
-            (itemCount - 1) -> applyPadding(holder, RIGHT)
+            0 -> applyPadding(context, holder.param, LEFT)
+            (itemCount - 1) -> applyPadding(context, holder.param, RIGHT)
         }
-        holder.popItemCard.getLayoutParams().height = height
-        holder.popItemCard.getLayoutParams().width = holder.width
+        holder.catItemCard.layoutParams.height = height
+        holder.catItemCard.layoutParams.width = holder.width
         Glide.with(context)
-            .load(item.thumbLink)
+            .load(item.link)
             .into(holder.itemImageView)
         holder.tvLabel.text = item.label
+        holder.catItemCard.setOnClickListener {
+            val intent = Intent(context, Shelf::class.java)
+            intent.putExtra("CategoryLabel", item.label)
+            intent.putExtra("Wallies", categoryMap[item.label])
+            context.startActivity(intent)
+        }
     }
     override fun getItemCount(): Int {
         return itemsList?.size
     }
 
-    fun applyPadding(holder: MyViewHolder, side: Int) {
-        var dpRatio = context.getResources().getDisplayMetrics().density;
-        when (side) {
-            LEFT -> holder.param.setMargins((16 * dpRatio).toInt(),0,(4 * dpRatio).toInt(),0)
-            RIGHT -> holder.param.setMargins((4 * dpRatio).toInt(),0,(8 * dpRatio).toInt(),0)
-        }
-        holder.popItemCard.layoutParams = holder.param
-    }
 }
