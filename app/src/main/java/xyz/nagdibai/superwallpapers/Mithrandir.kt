@@ -7,9 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
-import android.widget.LinearLayout
 import androidx.core.view.WindowCompat
-import com.example.myapplication.PhotoShelfAdapter
 
 fun hideSystemUI(window: Window) {
     // Enables regular immersive mode

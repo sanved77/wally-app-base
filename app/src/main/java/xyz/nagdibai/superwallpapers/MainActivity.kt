@@ -1,14 +1,11 @@
 package xyz.nagdibai.superwallpapers
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.view.doOnLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.CategoryListAdapter
-import com.example.myapplication.PopularListAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -31,6 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         // Layout setup
         bnd = HomeMainBinding.inflate(layoutInflater)
@@ -64,11 +62,7 @@ class MainActivity : AppCompatActivity() {
         bnd.menuBtn.setOnClickListener {
             rvPopular.layoutParams;
         }
-        bnd.btnSavedWallpapers.setOnClickListener {
-            val intent = Intent(this, Shelf::class.java)
-            intent.putExtra("SamaanPani",popularItemsList)
-            startActivity(intent)
-        }
+
     }
 
     private fun grabThemWallpapers() {
@@ -85,6 +79,7 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
 
                     val data = response.body()!!
+                    categoryMap["All"] = ArrayList<String>()
 
                     var popularSorted = data.sortedWith(compareBy {it.downloads}).asReversed()
 
@@ -95,6 +90,7 @@ class MainActivity : AppCompatActivity() {
                             if (!categoryMap.containsKey(data[i].category))
                                 categoryMap[data[i].category] = ArrayList<String>()
                             categoryMap[data[i].category]?.add(data[i].link);
+                            categoryMap["All"]?.add(data[i].link);
                         }
                         popularListAdapter.notifyDataSetChanged()
 
@@ -122,4 +118,20 @@ class MainActivity : AppCompatActivity() {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) hideSystemUI(window)
     }
+
+//    package xyz.nagdibai.superwallpapers
+//
+//    import android.content.Context
+//    import com.bumptech.glide.GlideBuilder
+//    import com.bumptech.glide.annotation.GlideModule
+//    import com.bumptech.glide.load.engine.cache.LruResourceCache
+//    import com.bumptech.glide.module.AppGlideModule
+//
+//    @com.bumptech.glide.annotation.GlideModule
+//    class GlideModule : AppGlideModule() {
+//        override fun applyOptions(context: Context, builder: GlideBuilder) {
+//            val memoryCacheSizeBytes = 1024 * 1024 * 20 // 20mb
+//            builder.setMemoryCache(LruResourceCache(memoryCacheSizeBytes.toLong()))
+//        }
+//    }
 }

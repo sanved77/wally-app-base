@@ -1,4 +1,4 @@
-package com.example.myapplication
+package xyz.nagdibai.superwallpapers
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -10,6 +10,7 @@ import androidx.annotation.NonNull
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import xyz.nagdibai.superwallpapers.R
 import xyz.nagdibai.superwallpapers.LEFT
 import xyz.nagdibai.superwallpapers.RIGHT
@@ -40,6 +41,8 @@ internal class PhotoShelfAdapter(private var itemsList: ArrayList<String>, priva
         holder.photoHolderParam.height = holder.height
         Glide.with(context)
             .load(item)
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
             .into(holder.itemImageView)
     }
     override fun getItemCount(): Int {

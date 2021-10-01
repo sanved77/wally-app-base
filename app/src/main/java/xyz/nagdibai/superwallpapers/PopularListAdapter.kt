@@ -1,4 +1,4 @@
-package com.example.myapplication
+package xyz.nagdibai.superwallpapers
 
 import android.content.Context
 import android.os.Build
