@@ -48,7 +48,7 @@ internal class CategoryListAdapter(
         holder.tvLabel.text = item.label
         holder.tvLabel.post(Runnable {
             val lineCount: Int = holder.tvLabel.lineCount
-            holder.tvLabel.textSize = 16f
+            if (lineCount >= 2) holder.tvLabel.textSize = 16f
         })
         holder.catItemCard.setOnClickListener {
             val intent = Intent(context, Shelf::class.java)
