@@ -1,8 +1,6 @@
 package xyz.nagdibai.superwallpapers
 
 import android.content.Context
-import android.os.Build
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,11 +9,6 @@ import androidx.annotation.NonNull
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import xyz.nagdibai.superwallpapers.R
-import xyz.nagdibai.superwallpapers.LEFT
-import xyz.nagdibai.superwallpapers.RIGHT
-import xyz.nagdibai.superwallpapers.applyPadding
 
 
 internal class PopularListAdapter(private var itemsList: List<String>, private var context: Context, private var height: Int) :
@@ -25,7 +18,6 @@ internal class PopularListAdapter(private var itemsList: List<String>, private v
         var popItemCard: CardView = view.findViewById(R.id.popItemCard)
         val param = popItemCard.layoutParams as ViewGroup.MarginLayoutParams
         val width = (height/16)*9
-
     }
     @NonNull
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -43,6 +35,7 @@ internal class PopularListAdapter(private var itemsList: List<String>, private v
         holder.popItemCard.getLayoutParams().width = holder.width
         Glide.with(context)
             .load(item)
+            .skipMemoryCache(true)
             .into(holder.itemImageView)
     }
     override fun getItemCount(): Int {

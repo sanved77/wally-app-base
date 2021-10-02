@@ -28,13 +28,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-        // Layout setup
         bnd = HomeMainBinding.inflate(layoutInflater)
         val view = bnd.root
         setContentView(view)
 
+        setUpImageLists()
+        grabThemWallpapers()
+
+    }
+
+    private fun setUpImageLists() {
         // List Image height preset
         var imgHeight: Int = 0
 
@@ -55,14 +58,6 @@ class MainActivity : AppCompatActivity() {
             rvCategories.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
             rvCategories.adapter = categoryListAdapter
         }
-
-        // Grabbing data
-        grabThemWallpapers()
-
-        bnd.menuBtn.setOnClickListener {
-            rvPopular.layoutParams;
-        }
-
     }
 
     private fun grabThemWallpapers() {
@@ -119,19 +114,4 @@ class MainActivity : AppCompatActivity() {
         if (hasFocus) hideSystemUI(window)
     }
 
-//    package xyz.nagdibai.superwallpapers
-//
-//    import android.content.Context
-//    import com.bumptech.glide.GlideBuilder
-//    import com.bumptech.glide.annotation.GlideModule
-//    import com.bumptech.glide.load.engine.cache.LruResourceCache
-//    import com.bumptech.glide.module.AppGlideModule
-//
-//    @com.bumptech.glide.annotation.GlideModule
-//    class GlideModule : AppGlideModule() {
-//        override fun applyOptions(context: Context, builder: GlideBuilder) {
-//            val memoryCacheSizeBytes = 1024 * 1024 * 20 // 20mb
-//            builder.setMemoryCache(LruResourceCache(memoryCacheSizeBytes.toLong()))
-//        }
-//    }
 }

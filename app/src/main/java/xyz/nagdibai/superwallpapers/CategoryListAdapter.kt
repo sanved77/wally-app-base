@@ -43,8 +43,13 @@ internal class CategoryListAdapter(
         holder.catItemCard.layoutParams.width = holder.width
         Glide.with(context)
             .load(item.link)
+            .skipMemoryCache(true)
             .into(holder.itemImageView)
         holder.tvLabel.text = item.label
+        holder.tvLabel.post(Runnable {
+            val lineCount: Int = holder.tvLabel.lineCount
+            holder.tvLabel.textSize = 16f
+        })
         holder.catItemCard.setOnClickListener {
             val intent = Intent(context, Shelf::class.java)
             intent.putExtra("CategoryLabel", item.label)
