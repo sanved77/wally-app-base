@@ -1,48 +1,62 @@
 package xyz.nagdibai.superwallpapers
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.core.view.doOnLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
+import com.google.android.gms.ads.MobileAds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import retrofit2.awaitResponse
+import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 import xyz.nagdibai.superwallpapers.databinding.HomeMainBinding
 
 const val BASE_URL = "http://nagdibai.xyz/wally-api/"
+const val API_FAILURE_MSG = "Failed to load wallpapers"
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bnd: HomeMainBinding
-    private val popularItemsList = ArrayList<String>()
-    private val categoryItemsList = ArrayList<CategoryListItem>()
+    private val popularItemsList = ArrayList<ChitraItem>()
+    private val categoryItemsList = ArrayList<ChitraItem>()
+    private val favoriteItemsList = ArrayList<ChitraItem>()
     private lateinit var popularListAdapter: PopularListAdapter
     private lateinit var categoryListAdapter: CategoryListAdapter
-    private var categoryMap = HashMap<String, ArrayList<String>>()
+    private var categoryMap = HashMap<String, ArrayList<ChitraItem>>()
+    private val favViewModel: FavViewModel by viewModels {
+        FavViewModelFactory((application as FavApp).repository)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         bnd = HomeMainBinding.inflate(layoutInflater)
         val view = bnd.root
         setContentView(view)
 
+        MobileAds.initialize(this) {}
+
         setUpImageLists()
         grabThemWallpapers()
+        loadUpFavorites()
 
     }
 
     private fun setUpImageLists() {
         // List Image height preset
-        var imgHeight: Int = 0
+        var imgHeight = 0
 
         // Popular Images
-        val rvPopular: RecyclerView = bnd.rvPopular;
+        val rvPopular: RecyclerView = bnd.rvPopular
         rvPopular.doOnLayout {
             imgHeight = it.measuredHeight
             popularListAdapter = PopularListAdapter(popularItemsList, this, imgHeight)
@@ -51,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Categories
-        val rvCategories: RecyclerView = bnd.rvCategories;
+        val rvCategories: RecyclerView = bnd.rvCategories
         rvCategories.doOnLayout {
             imgHeight = it.measuredHeight
             categoryListAdapter = CategoryListAdapter(categoryItemsList, categoryMap, this, imgHeight)
@@ -68,44 +82,88 @@ class MainActivity : AppCompatActivity() {
             .build()
             .create(WallyApi::class.java)
 
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                val response = api.getAllWallpapers(getString(R.string.collection)).awaitResponse()
-                if (response.isSuccessful) {
+        val call = api.getAllWallpapers(getString(R.string.collection))
 
+        call.enqueue(object : Callback<Chitra> {
+            override fun onResponse(call: Call<Chitra>, response: Response<Chitra>) {
+                if (response.code() == 200) {
                     val data = response.body()!!
-                    categoryMap["All"] = ArrayList<String>()
+                    categoryMap["All"] = ArrayList<ChitraItem>()
 
                     var popularSorted = data.sortedWith(compareBy {it.downloads}).asReversed()
 
-                    withContext(Dispatchers.Main) {
-                        for (i in data.indices) {
-                            if (i in 0..4)
-                                popularItemsList.add(popularSorted[i].link);
-                            if (!categoryMap.containsKey(data[i].category))
-                                categoryMap[data[i].category] = ArrayList<String>()
-                            categoryMap[data[i].category]?.add(data[i].link);
-                            categoryMap["All"]?.add(data[i].link);
-                        }
-                        popularListAdapter.notifyDataSetChanged()
-
-                        categoryMap.forEach{
-                            categoryItemsList.add(CategoryListItem(it.key, it.value[1]))
-                        }
-
-                        categoryListAdapter.notifyDataSetChanged()
+                    for (i in data.indices) {
+                        if (i in 0..4)
+                            popularItemsList.add(
+                                ChitraItem(
+                                    popularSorted[i].category,
+                                    popularSorted[i].downloads,
+                                    popularSorted[i].keywords,
+                                    popularSorted[i].link
+                                )
+                            )
+                        if (!categoryMap.containsKey(data[i].category))
+                            categoryMap[data[i].category] = ArrayList<ChitraItem>()
+                        var tempChitra = ChitraItem(
+                            data[i].category,
+                            data[i].downloads,
+                            data[i].keywords,
+                            data[i].link
+                        )
+                        categoryMap[data[i].category]?.add(tempChitra)
+                        categoryMap["All"]?.add(tempChitra)
                     }
+                    popularListAdapter.notifyDataSetChanged()
 
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main){
-                    Toast.makeText(
-                        applicationContext,
-                        "Network failure...",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    categoryMap.forEach {
+                        categoryItemsList.add(
+                            ChitraItem(
+                                it.key,
+                                it.value[0].downloads,
+                                it.value[0].keywords,
+                                it.value[0].link
+                            )
+                        )
+                    }
+                    categoryListAdapter.notifyDataSetChanged()
+
+                } else if (response.code() == 400) {
+                    Toast.makeText(this@MainActivity, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
+                    Log.e("MainActivity", "API failed 400")
+                } else if (response.code() == 500) {
+                    Toast.makeText(this@MainActivity, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
+                    Log.e("MainActivity", "API failed 500")
                 }
             }
+
+            override fun onFailure(call: Call<Chitra>, t: Throwable) {
+                Toast.makeText(this@MainActivity, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
+            }
+        })
+
+    }
+
+    private fun loadUpFavorites() {
+        favViewModel.allFavs.observe(this) { favList ->
+            favList?.let { fav ->
+                fav.forEach {
+                    favoriteItemsList.add(
+                        ChitraItem(
+                        it.category,
+                        it.downloads,
+                        it.keywords,
+                        it.link
+                    )
+                    )
+                }
+            }
+        }
+
+        bnd.btnSavedWallpapers.setOnClickListener {
+            val intent = Intent(this, Shelf::class.java)
+            intent.putExtra("CategoryLabel", "Saved")
+            intent.putExtra("Wallies", favoriteItemsList)
+            startActivity(intent)
         }
     }
 

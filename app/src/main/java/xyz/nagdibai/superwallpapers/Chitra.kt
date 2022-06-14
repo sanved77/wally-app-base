@@ -1,3 +1,3 @@
 package xyz.nagdibai.superwallpapers
 
-class Chitra : ArrayList<ChitraItem>()
+class Chitra : ArrayList<ChitraItemAPI>()

@@ -2,6 +2,7 @@ package xyz.nagdibai.superwallpapers
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,8 +15,8 @@ import com.bumptech.glide.Glide
 
 
 internal class CategoryListAdapter(
-    private var itemsList: List<CategoryListItem>,
-    private var categoryMap: HashMap<String, ArrayList<String>>,
+    private var itemsList: List<ChitraItem>,
+    private var categoryMap: HashMap<String, ArrayList<ChitraItem>>,
     private var context: Context,
     private var height: Int
 ) :
@@ -34,7 +35,7 @@ internal class CategoryListAdapter(
         return MyViewHolder(itemView)
     }
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val item = itemsList?.get(position)
+        val item = itemsList[position]
         when (position) {
             0 -> applyPadding(context, holder.param, LEFT)
             (itemCount - 1) -> applyPadding(context, holder.param, RIGHT)
@@ -45,15 +46,15 @@ internal class CategoryListAdapter(
             .load(item.link)
             .skipMemoryCache(true)
             .into(holder.itemImageView)
-        holder.tvLabel.text = item.label
+        holder.tvLabel.text = item.category
         holder.tvLabel.post(Runnable {
             val lineCount: Int = holder.tvLabel.lineCount
             if (lineCount >= 2) holder.tvLabel.textSize = 16f
         })
         holder.catItemCard.setOnClickListener {
             val intent = Intent(context, Shelf::class.java)
-            intent.putExtra("CategoryLabel", item.label)
-            intent.putExtra("Wallies", categoryMap[item.label])
+            intent.putExtra("CategoryLabel", item.category)
+            intent.putExtra("Wallies", categoryMap[item.category])
             context.startActivity(intent)
         }
     }

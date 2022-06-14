@@ -1,10 +1,10 @@
 package xyz.nagdibai.superwallpapers
 
-import java.io.Serializable
-
-data class ChitraItem(
+data class ChitraItemAPI(
+    val __v: Int,
+    val _id: String,
     val category: String,
     val downloads: Int,
     val keywords: String,
     val link: String
-) : Serializable
+)
