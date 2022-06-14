@@ -1,5 +1,6 @@
 package xyz.nagdibai.superwallpapers
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
@@ -42,4 +43,18 @@ fun applyPadding(context: Context, param: ViewGroup.MarginLayoutParams, side: In
         LEFT -> param.setMargins(bigP,0,smallP,bottomP)
         RIGHT -> param.setMargins(smallP,0,bigP,bottomP)
     }
+}
+
+fun Context.showPermissionRequestDialog(
+    title: String,
+    body: String,
+    callback: () -> Unit
+) {
+    AlertDialog.Builder(this, R.style.AlertDialogTheme).also {
+        it.setTitle(title)
+        it.setMessage(body)
+        it.setPositiveButton("Retry") { _, _ ->
+            callback()
+        }
+    }.create().show()
 }

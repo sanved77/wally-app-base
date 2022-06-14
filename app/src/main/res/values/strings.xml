@@ -7,4 +7,6 @@
     <string name="admob_app_id">ca-app-pub-6707124696918182~5567193232</string>
     <string name="admob_photowindow_banner_id">ca-app-pub-6707124696918182/4633385510</string>
     <string name="admob_photowindow_banner_id_test">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="admob_photowindow_download">ca-app-pub-6707124696918182/9941761941</string>
+    <string name="admob_photowindow_download_test">ca-app-pub-3940256099942544/5224354917</string>
 </resources>
