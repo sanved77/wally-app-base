@@ -2,6 +2,7 @@ package xyz.nagdibai.superwallpapers
 
 import android.Manifest
 import android.content.ContentValues
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -19,23 +20,25 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
 import coil.Coil
 import coil.ImageLoader
 import coil.request.ImageRequest
 import com.bumptech.glide.Glide
 import com.google.android.gms.ads.*
-import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import xyz.nagdibai.superwallpapers.PrefData.Keys.FIRST_RUN_REVIEW_DONE
 import xyz.nagdibai.superwallpapers.databinding.PhotoWindowBinding
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+
 
 class PhotoWindow : AppCompatActivity() {
     private lateinit var bnd: PhotoWindowBinding
@@ -152,7 +155,7 @@ class PhotoWindow : AppCompatActivity() {
                 Log.d(TAG, "Permission granted")
             }
             shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
-                showPermissionRequestDialog(
+                showDialog(
                     "Permission Required",
                     "Permission required to store downloaded photos to gallery"
                 ) {
@@ -206,11 +209,36 @@ class PhotoWindow : AppCompatActivity() {
         }
         fos?.use {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+
+            val firstRunCheck: Flow<Boolean> = dataStore.data
+                .map { preferences -> preferences[FIRST_RUN_REVIEW_DONE] ?: true }
+
             val snack = Snackbar.make(bnd.clPhoto, "Photo downloaded to your gallery", Snackbar.LENGTH_INDEFINITE)
             snack.setAction("OK", View.OnClickListener {
                 Log.d(TAG, "Download complete dialog dismissed")
+                lifecycleScope.launch {
+                    firstRunCheck.collect() { firstRun ->
+                        if (firstRun) {
+                            showDialog(
+                                "Go Ad Free ?",
+                                "Remove the ads by giving us a review on Play Store",
+                                "Rate App"
+                            ) {
+                                val packageName = this@PhotoWindow.packageName
+                                val browserIntent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+                                )
+                                startActivity(browserIntent)
+                            }
+                            dataStore.edit { prefs -> prefs[FIRST_RUN_REVIEW_DONE] = false }
+                        }
+                    }
+                }
             })
-            snack.setActionTextColor(Color.YELLOW)
+            snack.setTextColor(Color.BLACK)
+            snack.setActionTextColor(Color.BLACK)
+            snack.setBackgroundTint(Color.GREEN)
             snack.show()
         }
     }
@@ -258,7 +286,7 @@ class PhotoWindow : AppCompatActivity() {
             }
 
             override fun onAdDismissedFullScreenContent() {
-                Log.d(TAG, "Ad was dismissed.")
+                Log.e("Chumbhan", "Ad was dismissed.")
                 mRewardedAd = null
             }
 

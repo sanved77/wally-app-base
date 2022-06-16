@@ -45,15 +45,16 @@ fun applyPadding(context: Context, param: ViewGroup.MarginLayoutParams, side: In
     }
 }
 
-fun Context.showPermissionRequestDialog(
+fun Context.showDialog(
     title: String,
     body: String,
+    btnText: String = "Retry",
     callback: () -> Unit
 ) {
     AlertDialog.Builder(this, R.style.AlertDialogTheme).also {
         it.setTitle(title)
         it.setMessage(body)
-        it.setPositiveButton("Retry") { _, _ ->
+        it.setPositiveButton(btnText) { _, _ ->
             callback()
         }
     }.create().show()

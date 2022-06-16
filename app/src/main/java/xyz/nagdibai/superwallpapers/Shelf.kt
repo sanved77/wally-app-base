@@ -1,7 +1,6 @@
 package xyz.nagdibai.superwallpapers
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.doOnLayout
 import androidx.recyclerview.widget.GridLayoutManager
@@ -39,9 +38,11 @@ class Shelf : AppCompatActivity() {
 
     private fun setFancyStuff() {
         bnd.fancyText.text = intent.getStringExtra("CategoryLabel")
-        Glide.with(baseContext)
-            .load(photoList[0].link)
-            .into(bnd.fancyImage)
+        if(photoList.size > 1) {
+            Glide.with(baseContext)
+                .load(photoList[0].link)
+                .into(bnd.fancyImage)
+        }
         bnd.backBtn.setOnClickListener {
             this.finish()
         }

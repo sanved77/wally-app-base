@@ -1,22 +1,19 @@
 package xyz.nagdibai.superwallpapers
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.doOnLayout
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.google.android.gms.ads.MobileAds
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import xyz.nagdibai.superwallpapers.databinding.HomeMainBinding
 
@@ -146,6 +143,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadUpFavorites() {
         favViewModel.allFavs.observe(this) { favList ->
             favList?.let { fav ->
+                favoriteItemsList.clear()
                 fav.forEach {
                     favoriteItemsList.add(
                         ChitraItem(
