@@ -3,88 +3,103 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/black"
-    android:id="@+id/clPhoto"
+    android:id="@+id/clPhotoParent"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/ivPhoto"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clPhoto"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/bannerAdPhotoWindow"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@drawable/bikini" />
-
-    <ImageButton
-        android:id="@+id/backBtn"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="36dp"
-        android:background="@drawable/top_left_nav_btn"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-        tools:ignore="SpeakableTextPresentCheck" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabFavorite"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:borderWidth="0dp"
-        android:backgroundTint="@color/white"
-        android:theme="@style/Theme.FAB"
-        app:srcCompat="@drawable/ic_baseline_favorite_border_24"
-        app:tint="@color/favRed"
-        app:layout_constraintBottom_toTopOf="@+id/fabDownload"
-        app:layout_constraintEnd_toEndOf="parent">
-
-    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+        app:layout_constraintTop_toTopOf="parent">
 
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabDownload"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:borderWidth="0dp"
-        android:backgroundTint="@color/white"
-        android:theme="@style/Theme.FAB"
-        app:srcCompat="@drawable/ic_baseline_cloud_download_24"
-        app:layout_constraintBottom_toTopOf="@+id/fabApply"
-        app:layout_constraintEnd_toEndOf="parent">
+        <ImageView
+            android:id="@+id/ivPhoto"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            tools:srcCompat="@drawable/bikini" />
 
-    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+        <ImageButton
+            android:id="@+id/backBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="36dp"
+            android:background="@drawable/top_left_nav_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+            tools:ignore="SpeakableTextPresentCheck" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabApply"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="32dp"
-        app:borderWidth="0dp"
-        android:backgroundTint="@color/white"
-        android:theme="@style/Theme.FAB"
-        app:layout_constraintBottom_toTopOf="@+id/bannerAdPhotoWindow"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_baseline_wallpaper_24"
-        app:strokeColor="@color/black">
 
-    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabFavorite"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/white"
+            android:theme="@style/Theme.FAB"
+            app:borderWidth="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/fabDownload"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_baseline_favorite_border_24"
+            app:tint="@color/favRed">
+
+        </com.google.android.material.floatingactionbutton.FloatingActionButton>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabDownload"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/white"
+            android:theme="@style/Theme.FAB"
+            app:borderWidth="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/fabApply"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_baseline_cloud_download_24">
+
+        </com.google.android.material.floatingactionbutton.FloatingActionButton>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabApply"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="48dp"
+            android:backgroundTint="@color/white"
+            android:theme="@style/Theme.FAB"
+            app:borderWidth="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_baseline_wallpaper_24"
+            app:strokeColor="@color/black">
+
+        </com.google.android.material.floatingactionbutton.FloatingActionButton>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/bannerAdPhotoWindow"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         app:adSize="SMART_BANNER"
-        app:adUnitId="@string/admob_photowindow_banner_id_test"
+        app:adUnitId="@string/admob_banner_id_test"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

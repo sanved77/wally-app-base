@@ -1,11 +1,14 @@
 package xyz.nagdibai.superwallpapers
 
 import android.Manifest
+import android.app.Activity
+import android.app.WallpaperManager
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
@@ -21,27 +24,30 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
 import coil.ImageLoader
-import coil.request.ImageRequest
 import com.bumptech.glide.Glide
 import com.google.android.gms.ads.*
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.material.snackbar.Snackbar
+import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import xyz.nagdibai.superwallpapers.PrefData.Keys.FIRST_RUN_REVIEW_DONE
 import xyz.nagdibai.superwallpapers.databinding.PhotoWindowBinding
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
+import java.io.*
 
+const val TAG = "PhotoWindow"
 
-class PhotoWindow : AppCompatActivity() {
+class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
     private lateinit var bnd: PhotoWindowBinding
+
     private lateinit var mAdView : AdView
     private lateinit var imgURL : String
     private lateinit var keywords : String
@@ -50,17 +56,20 @@ class PhotoWindow : AppCompatActivity() {
 
     private var isFavorite = false
     private var rewardAdShown = false
+    private var showCropperAfterRewardAd = false
+
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    private lateinit var resultLauncher: ActivityResultLauncher<Intent>
+    private lateinit var imageLoader: ImageLoader
+    private var mRewardedAd: RewardedAd? = null
+    private var mInterstitialAd: InterstitialAd? = null
+    private lateinit var options: UCrop.Options
     private val favViewModel: FavViewModel by viewModels {
         FavViewModelFactory((application as FavApp).repository)
     }
-    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
-    private lateinit var imageLoader: ImageLoader
-    private var mRewardedAd: RewardedAd? = null
-    private var TAG = "PhotoWindow"
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        super<AppCompatActivity>.onCreate(savedInstanceState)
         bnd = PhotoWindowBinding.inflate(layoutInflater)
         setContentView(bnd.root)
 
@@ -68,8 +77,9 @@ class PhotoWindow : AppCompatActivity() {
         setImageViewAndUI()
         setButtons()
         loadRewardAd()
-        setPermissionCallback()
-//        checkPermissionAndDownloadBitmap()
+        loadFullPageAd()
+        setActivityCallback()
+        setUpUCrop()
 
     }
 
@@ -124,9 +134,45 @@ class PhotoWindow : AppCompatActivity() {
                 checkPermissionAndDownloadBitmap()
             }
         }
+
+        bnd.fabApply.setOnClickListener {
+            cropAndApply()
+        }
     }
 
-    private fun setPermissionCallback() {
+    private fun cropAndApply() {
+        val bitmap = (bnd.ivPhoto.drawable as BitmapDrawable).bitmap
+        val cacheDir = baseContext.cacheDir
+        val f = File(cacheDir, "pic")
+
+        try {
+            val out = FileOutputStream(f)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            out.flush()
+            out.close()
+            Log.d(TAG, "File saved")
+        } catch (e: FileNotFoundException) {
+            Log.e(TAG, "File not in cache ${e.message}")
+        } catch (e: IOException) {
+            Log.e(TAG, "IO Error ${e.message}")
+        }
+        var sourceUri = Uri.fromFile(File(cacheDir, "pic"))
+        var fauxDestination = Uri.fromFile(File(cacheDir, "1"))
+
+        var width = ScreenMetrics.getScreenSize(this).width
+        var height = ScreenMetrics.getScreenSize(this).height
+
+
+        val cropper = UCrop.of(sourceUri, fauxDestination)
+            .withAspectRatio(width.toFloat(), height.toFloat())
+            .withMaxResultSize(width, height)
+            .getIntent(this)
+
+        resultLauncher.launch(cropper)
+
+    }
+
+    private fun setActivityCallback() {
         requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -137,12 +183,26 @@ class PhotoWindow : AppCompatActivity() {
                 } else {
                     val snack = Snackbar.make(bnd.clPhoto, "Need permission to download to Gallery", Snackbar.LENGTH_INDEFINITE)
                     snack.setAction("Retry", View.OnClickListener {
+                        // TODO: Add analytics
                         checkPermissionAndDownloadBitmap()
                     })
                     snack.setActionTextColor(Color.YELLOW)
+                    snack.anchorView = bnd.bannerAdPhotoWindow
                     snack.show()
                 }
             }
+
+        resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                var resultUri: Uri? = data?.let { UCrop.getOutput(it) };
+                if (resultUri != null) {
+                    applyWallpaper(resultUri)
+                } else {
+                    Toast.makeText(this, "Error loading data for crop tool", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun checkPermissionAndDownloadBitmap() {
@@ -156,38 +216,22 @@ class PhotoWindow : AppCompatActivity() {
             }
             shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
                 showDialog(
-                    "Permission Required",
-                    "Permission required to store downloaded photos to gallery"
+                    "Storage Permission",
+                    "Select 'Allow' to give permission to store downloaded photos",
+                "OK"
                 ) {
+                    // TODO: Add analytics
                     requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }
             }
             else -> {
                 requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                val snack = Snackbar.make(bnd.clPhoto, "Need permission to download to Gallery", Snackbar.LENGTH_INDEFINITE)
-                snack.setAction("Retry", View.OnClickListener {
-                    checkPermissionAndDownloadBitmap()
-                })
-                snack.setActionTextColor(Color.YELLOW)
-                snack.show()
             }
         }
     }
 
-    private fun getBitmapFromUrl(bitmapURL: String) = lifecycleScope.launch {
-
-        val request = ImageRequest.Builder(this@PhotoWindow)
-            .data(bitmapURL)
-            .build()
-        try {
-            val downloadedBitmap = (imageLoader.execute(request).drawable as BitmapDrawable).bitmap
-            saveMediaToStorage(downloadedBitmap)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error loading image " + e.stackTraceToString())
-        }
-    }
-
-    private fun saveMediaToStorage(bitmap: Bitmap) {
+    private fun saveMediaToStorage() {
+        val bitmap = (bnd.ivPhoto.drawable as BitmapDrawable).bitmap
         val filename = "${System.currentTimeMillis()}.jpg"
         var fos: OutputStream? = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -213,7 +257,7 @@ class PhotoWindow : AppCompatActivity() {
             val firstRunCheck: Flow<Boolean> = dataStore.data
                 .map { preferences -> preferences[FIRST_RUN_REVIEW_DONE] ?: true }
 
-            val snack = Snackbar.make(bnd.clPhoto, "Photo downloaded to your gallery", Snackbar.LENGTH_INDEFINITE)
+            val snack = Snackbar.make(bnd.clPhoto, "Wallpaper downloaded to your Gallery", Snackbar.LENGTH_INDEFINITE)
             snack.setAction("OK", View.OnClickListener {
                 Log.d(TAG, "Download complete dialog dismissed")
                 lifecycleScope.launch {
@@ -239,26 +283,80 @@ class PhotoWindow : AppCompatActivity() {
             snack.setTextColor(Color.BLACK)
             snack.setActionTextColor(Color.BLACK)
             snack.setBackgroundTint(Color.GREEN)
+            snack.anchorView = bnd.bannerAdPhotoWindow
             snack.show()
+        }
+    }
+
+    private fun applyWallpaper(imageUri: Uri) {
+
+        var bitmap: Bitmap? = null
+        if (Build.VERSION.SDK_INT >= 29) {
+            val source: ImageDecoder.Source =
+                ImageDecoder.createSource(applicationContext.contentResolver, imageUri)
+            try {
+                bitmap = ImageDecoder.decodeBitmap(source)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        } else {
+            try {
+                bitmap =
+                    MediaStore.Images.Media.getBitmap(applicationContext.contentResolver, imageUri)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+        val wallpaperManager = WallpaperManager.getInstance(baseContext)
+        if (bitmap != null) {
+            wallpaperManager.setBitmap(bitmap)
+//            Toast.makeText(this, "Wallpaper set!", Toast.LENGTH_SHORT).show()
+            val snack = Snackbar.make(bnd.clPhoto, "Wallpaper set", Snackbar.LENGTH_INDEFINITE)
+            snack.setAction("OK", View.OnClickListener {
+                // TODO: Add analytics
+            })
+            snack.setTextColor(Color.BLACK)
+            snack.setActionTextColor(Color.BLACK)
+            snack.setBackgroundTint(Color.GREEN)
+            snack.anchorView = bnd.bannerAdPhotoWindow
+            snack.show()
+            if(mInterstitialAd != null) {
+                mInterstitialAd?.show(this)
+            }
+        } else {
+            Log.e(TAG, "Error loading wallpaper manager")
+            Toast.makeText(this, "Error loading wallpaper manager", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun downloadPhoto() {
         if (mRewardedAd != null && !rewardAdShown) {
-            mRewardedAd?.show(this, OnUserEarnedRewardListener {
-                Log.d(TAG, "User earned the reward.")
-                getBitmapFromUrl(imgURL)
-            })
-            rewardAdShown = true;
+            showDialog(
+                "Download",
+                "Watch an ad to download the wallpaper to your Gallery?",
+                "Ok",
+                "Cancel"
+            ) {
+                mRewardedAd?.show(this, OnUserEarnedRewardListener {
+                    Log.d(TAG, "User earned the reward for download.")
+                    saveMediaToStorage()
+                })
+                rewardAdShown = true;
+            }
+        } else if(mInterstitialAd != null) {
+            mInterstitialAd?.show(this)
+            saveMediaToStorage()
         } else {
-            Log.d(TAG, "Ad not loaded but download allowed")
-            getBitmapFromUrl(imgURL)
+            Log.d(TAG, "Ads not loaded but download allowed")
+            Log.d(TAG, "Ads not loaded but download allowed")
+            saveMediaToStorage()
         }
     }
 
     private fun loadRewardAd() {
         var adRequest = AdRequest.Builder().build()
 
+        // TODO: Change the ad id
         RewardedAd.load(
             this,
             getString(R.string.admob_photowindow_download_test),
@@ -294,8 +392,37 @@ class PhotoWindow : AppCompatActivity() {
 
     }
 
+    private fun loadFullPageAd() {
+        var adRequest = AdRequest.Builder().build()
+
+        // TODO: Change the ad id
+        InterstitialAd.load(this,getString(R.string.admob_photowindow_full_test), adRequest, object : InterstitialAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d(TAG, adError?.message)
+                mInterstitialAd = null
+            }
+
+            override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                Log.d(TAG, "Full page Ad was loaded.")
+                mInterstitialAd = interstitialAd
+            }
+        })
+
+    }
+
+    private fun setUpUCrop () {
+        options = UCrop.Options()
+        options.setCompressionQuality(100)
+        options.setMaxBitmapSize(10000)
+        options.setToolbarColor(ContextCompat.getColor(this, android.R.color.white))
+        options.setStatusBarColor(ContextCompat.getColor(this, android.R.color.white))
+        options.setActiveControlsWidgetColor(ContextCompat.getColor(this, android.R.color.black))
+        options.setToolbarWidgetColor(ContextCompat.getColor(this, android.R.color.black))
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) hideSystemUI(window)
     }
+
 }

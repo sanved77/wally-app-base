@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -44,11 +45,20 @@ fun applyPadding(context: Context, param: ViewGroup.MarginLayoutParams, side: In
         RIGHT -> param.setMargins(smallP,0,bigP,bottomP)
     }
 }
+fun applyPadding(context: Context, param: ViewGroup.MarginLayoutParams, side: Int, paddingSize: Int) {
+    var dpRatio = context.resources.displayMetrics.density;
+    var pad = (paddingSize * dpRatio).toInt()
+    when (side) {
+        POS -> param.setMargins(pad,pad,0,0)
+        LAST_POS -> param.setMargins(pad,pad,pad,0)
+    }
+}
 
 fun Context.showDialog(
     title: String,
     body: String,
-    btnText: String = "Retry",
+    btnText: String,
+    cancelBtnText: String = "",
     callback: () -> Unit
 ) {
     AlertDialog.Builder(this, R.style.AlertDialogTheme).also {
@@ -56,6 +66,11 @@ fun Context.showDialog(
         it.setMessage(body)
         it.setPositiveButton(btnText) { _, _ ->
             callback()
+        }
+        if(cancelBtnText != "") {
+            it.setNegativeButton(cancelBtnText) { _, _ ->
+                Log.d("Mithrandir", "Cancel pressed on ad watch")
+            }
         }
     }.create().show()
 }

@@ -2,7 +2,6 @@ package xyz.nagdibai.superwallpapers
 
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +10,7 @@ import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 
 
@@ -35,6 +35,10 @@ internal class CategoryListAdapter(
         return MyViewHolder(itemView)
     }
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        val circularProgressDrawable = CircularProgressDrawable(context)
+        circularProgressDrawable.strokeWidth = 5f
+        circularProgressDrawable.centerRadius = 60f
+        circularProgressDrawable.start()
         val item = itemsList[position]
         when (position) {
             0 -> applyPadding(context, holder.param, LEFT)
@@ -45,7 +49,9 @@ internal class CategoryListAdapter(
         Glide.with(context)
             .load(item.link)
             .skipMemoryCache(true)
+            .placeholder(circularProgressDrawable)
             .into(holder.itemImageView)
+
         holder.tvLabel.text = item.category
         holder.tvLabel.post(Runnable {
             val lineCount: Int = holder.tvLabel.lineCount
@@ -55,6 +61,7 @@ internal class CategoryListAdapter(
             val intent = Intent(context, Shelf::class.java)
             intent.putExtra("CategoryLabel", item.category)
             intent.putExtra("Wallies", categoryMap[item.category])
+            intent.putExtra("AllWallies", categoryMap["All"])
             context.startActivity(intent)
         }
     }

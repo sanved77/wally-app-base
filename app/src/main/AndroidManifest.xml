@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://schemas.android.com/apk/res/android"
 package="xyz.nagdibai.superwallpapers">
 
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 <application
     android:name=".FavApp"
@@ -15,6 +16,7 @@ package="xyz.nagdibai.superwallpapers">
     android:theme="@style/Theme.SuperWallpapers">
     <activity
         android:name=".MainActivity"
+        android:windowSoftInputMode="stateHidden"
         android:exported="true">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
@@ -23,15 +25,21 @@ package="xyz.nagdibai.superwallpapers">
         </intent-filter>
     </activity>
     <activity
+        android:windowSoftInputMode="stateHidden"
         android:name="xyz.nagdibai.superwallpapers.Shelf"
         android:exported="true"/>
     <activity
         android:name="xyz.nagdibai.superwallpapers.PhotoWindow"
         android:exported="true"/>
+    <activity
+        android:name="com.yalantis.ucrop.UCropActivity"
+        android:screenOrientation="portrait"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
+
     <meta-data
         android:name="preloaded_fonts"
         android:resource="@array/preloaded_fonts" />
-
     <meta-data
         android:name="com.google.android.gms.ads.APPLICATION_ID"
         android:value="@string/admob_app_id"/>

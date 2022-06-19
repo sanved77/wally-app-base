@@ -77,8 +77,11 @@
             android:layout_height="36dp"
             android:background="@drawable/search"
             android:ems="10"
+            android:textCursorDrawable="@null"
+            android:imeOptions="actionSearch"
+            android:maxLines="1"
             android:hint="Enter keywords"
-            android:inputType="textPersonName"
+            android:inputType="text"
             android:paddingLeft="8dp"
             android:paddingRight="16dp" />
 

@@ -3,8 +3,6 @@ package xyz.nagdibai.superwallpapers
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.text.method.TextKeyListener.clear
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +10,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.NonNull
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
@@ -27,7 +24,7 @@ internal class PhotoShelfAdapter(private var itemsList: ArrayList<ChitraItem>, p
     RecyclerView.Adapter<PhotoShelfAdapter.MyViewHolder>() {
     internal inner class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var itemImageView: ImageView = view.findViewById(R.id.ivPopListItem)
-        var popItemCard: CardView = view.findViewById(R.id.popItemCard)
+        var popItemCard: LinearLayout = view.findViewById(R.id.popItemCard)
         var llPhotoHolder: LinearLayout = view.findViewById(R.id.llPhotoHolder)
         val photoHolderParam = llPhotoHolder.layoutParams as ViewGroup.MarginLayoutParams
         val cardParam = popItemCard.layoutParams as ViewGroup.MarginLayoutParams
@@ -45,13 +42,13 @@ internal class PhotoShelfAdapter(private var itemsList: ArrayList<ChitraItem>, p
         circularProgressDrawable.centerRadius = 60f
         circularProgressDrawable.start()
         val item = itemsList[position]
-        applyPadding(context, holder.cardParam, if (position%2==0) LEFT else RIGHT, big = 8, small = 4, bottom = 8)
+        applyPadding(context, holder.cardParam, if (position%4==3) LAST_POS else POS, 2)
         holder.photoHolderParam.width = width
         holder.photoHolderParam.height = holder.height
         Glide.with(context)
             .load(item.link)
             .skipMemoryCache(true)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .placeholder(circularProgressDrawable)
             .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(p0: GlideException?, p1: Any?, p2: Target<Drawable>?, p3: Boolean): Boolean {

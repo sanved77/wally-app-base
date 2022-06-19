@@ -3,6 +3,8 @@ package xyz.nagdibai.superwallpapers
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +18,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import xyz.nagdibai.superwallpapers.databinding.HomeMainBinding
+
 
 const val BASE_URL = "http://nagdibai.xyz/wally-api/"
 const val API_FAILURE_MSG = "Failed to load wallpapers"
@@ -45,12 +48,13 @@ class MainActivity : AppCompatActivity() {
         setUpImageLists()
         grabThemWallpapers()
         loadUpFavorites()
+        setUpSearch()
 
     }
-
+    
     private fun setUpImageLists() {
         // List Image height preset
-        var imgHeight = 0
+        var imgHeight: Int
 
         // Popular Images
         val rvPopular: RecyclerView = bnd.rvPopular
@@ -147,11 +151,11 @@ class MainActivity : AppCompatActivity() {
                 fav.forEach {
                     favoriteItemsList.add(
                         ChitraItem(
-                        it.category,
-                        it.downloads,
-                        it.keywords,
-                        it.link
-                    )
+                            it.category,
+                            it.downloads,
+                            it.keywords,
+                            it.link
+                        )
                     )
                 }
             }
@@ -161,6 +165,41 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, Shelf::class.java)
             intent.putExtra("CategoryLabel", "Saved")
             intent.putExtra("Wallies", favoriteItemsList)
+            intent.putExtra("AllWallies", categoryMap["All"])
+            startActivity(intent)
+        }
+    }
+    
+    private fun setUpSearch() {
+        bnd.etSearch.setOnEditorActionListener(OnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                searchThisShit()
+                return@OnEditorActionListener true
+            }
+            false
+        })
+        bnd.btnSearch.setOnClickListener {
+            searchThisShit()
+        }
+    }
+
+    private fun searchThisShit() {
+        val term = bnd.etSearch.text.toString()
+
+        if (term == "") {
+            bnd.etSearch.error = "Enter something to search"
+        } else {
+            val searchResultList = ArrayList<ChitraItem>()
+
+            categoryMap["All"]?.forEach {
+                if (it.keywords.contains(term)) {
+                    searchResultList.add(it)
+                }
+            }
+            val intent = Intent(this, Shelf::class.java)
+            intent.putExtra("CategoryLabel", term)
+            intent.putExtra("Wallies", searchResultList)
+            intent.putExtra("AllWallies", categoryMap["All"])
             startActivity(intent)
         }
     }

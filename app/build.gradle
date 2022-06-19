@@ -59,6 +59,9 @@ dependencies {
     kapt 'com.github.bumptech.glide:compiler:4.12.0'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
+    // uCrop
+    implementation 'com.github.yalantis:ucrop:2.2.6-native'
+
     // Coil
     implementation("io.coil-kt:coil:2.1.0")
 
