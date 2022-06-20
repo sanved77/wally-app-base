@@ -72,6 +72,7 @@
             android:layout_width="250dp"
             android:layout_height="36dp"
             android:background="@drawable/search"
+            android:textCursorDrawable="@null"
             android:imeOptions="actionSearch"
             android:ems="10"
             android:maxLines="1"
@@ -118,8 +119,8 @@
 
         <com.google.android.gms.ads.AdView
             android:id="@+id/bannerShelf"
-            android:layout_width="411dp"
-            android:layout_height="92dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             app:adSize="SMART_BANNER"
@@ -128,6 +129,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/rvPhotoShelf" />
+
+        <TextView
+            android:id="@+id/tvNoMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:text="No items found !"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/rvPhotoShelf"
+            app:layout_constraintEnd_toEndOf="@+id/rvPhotoShelf"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

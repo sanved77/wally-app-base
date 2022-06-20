@@ -2,6 +2,7 @@ package xyz.nagdibai.superwallpapers
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +23,12 @@ class Shelf : AppCompatActivity() {
     private lateinit var photoList: ArrayList<ChitraItem>
     private lateinit var allPhotoList: ArrayList<ChitraItem>
     private lateinit var label: String
+    private var searchTerm: String? = ""
+
     private var imgWidth: Int = 0
+    private var selfRender: Boolean? = null
+    private var isFavCall: Boolean? = null
+    private val regex = Regex("[^A-Za-z0-9]")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +45,9 @@ class Shelf : AppCompatActivity() {
 
     private fun grabBundle(){
         label = intent.getStringExtra("CategoryLabel")!!
+        searchTerm = intent.getStringExtra("SearchTerm")
+        selfRender = intent.getBooleanExtra("SelfRender", false)
+        isFavCall = intent.getBooleanExtra("FavCall", false)
         photoList = intent.getSerializableExtra("Wallies") as ArrayList<ChitraItem>
         allPhotoList = intent.getSerializableExtra("AllWallies") as ArrayList<ChitraItem>
     }
@@ -50,10 +59,12 @@ class Shelf : AppCompatActivity() {
 
     private fun setFancyStuff() {
         bnd.fancyText.text = intent.getStringExtra("CategoryLabel")
-        if(photoList.size > 1) {
+        if(photoList.size > 0) {
             Glide.with(baseContext)
                 .load(photoList[0].link)
                 .into(bnd.fancyImage)
+        } else {
+            bnd.tvNoMsg.visibility = View.VISIBLE
         }
         bnd.backBtn.setOnClickListener {
             this.finish()
@@ -81,6 +92,10 @@ class Shelf : AppCompatActivity() {
     }
 
     private fun setUpSearch() {
+        if(searchTerm != ""){
+            bnd.etSearch.setText(searchTerm)
+            bnd.etSearch.setSelection(bnd.etSearch.length())
+        }
         bnd.etSearch.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 searchThisShit()
@@ -94,7 +109,11 @@ class Shelf : AppCompatActivity() {
     }
 
     private fun searchThisShit() {
-        val term = bnd.etSearch.text.toString()
+        bnd.tvNoMsg.visibility = View.GONE
+        hideKeyboard(currentFocus ?: View(this))
+        var term = bnd.etSearch.text.toString()
+        term = term.lowercase().replace(" ", "")
+        term = regex.replace(term, "")
 
         if (term == "") {
             bnd.etSearch.error = "Enter something to search"
@@ -106,11 +125,23 @@ class Shelf : AppCompatActivity() {
                     searchResultList.add(it)
                 }
             }
-            val intent = Intent(this, Shelf::class.java)
-            intent.putExtra("CategoryLabel", term)
-            intent.putExtra("Wallies", searchResultList)
-            intent.putExtra("AllWallies", allPhotoList)
-            startActivity(intent)
+
+            if (selfRender!!) {
+                photoList.clear();
+                if (searchResultList.size == 0) {
+                    bnd.tvNoMsg.visibility = View.VISIBLE
+                }
+                photoList.addAll(searchResultList)
+                photoShelfAdapter.notifyDataSetChanged()
+            } else {
+                val intent = Intent(this, Shelf::class.java)
+                intent.putExtra("CategoryLabel", "Search")
+                intent.putExtra("SelfRender", true)
+                intent.putExtra("SearchTerm", term)
+                intent.putExtra("Wallies", searchResultList)
+                intent.putExtra("AllWallies", allPhotoList)
+                startActivity(intent)
+            }
         }
     }
 

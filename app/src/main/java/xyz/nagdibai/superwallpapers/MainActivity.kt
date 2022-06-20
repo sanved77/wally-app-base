@@ -166,6 +166,7 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("CategoryLabel", "Saved")
             intent.putExtra("Wallies", favoriteItemsList)
             intent.putExtra("AllWallies", categoryMap["All"])
+            intent.putExtra("FavCall", true)
             startActivity(intent)
         }
     }
@@ -197,7 +198,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             val intent = Intent(this, Shelf::class.java)
-            intent.putExtra("CategoryLabel", term)
+            intent.putExtra("CategoryLabel", "Search")
+            intent.putExtra("SearchTerm", term)
+            intent.putExtra("SelfRender", true)
             intent.putExtra("Wallies", searchResultList)
             intent.putExtra("AllWallies", categoryMap["All"])
             startActivity(intent)

@@ -1,5 +1,6 @@
 package xyz.nagdibai.superwallpapers
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
@@ -9,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import androidx.core.view.WindowCompat
 
 fun hideSystemUI(window: Window) {
@@ -73,4 +75,9 @@ fun Context.showDialog(
             }
         }
     }.create().show()
+}
+
+fun Context.hideKeyboard(view: View) {
+    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
 }
