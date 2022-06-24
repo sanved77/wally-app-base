@@ -4,7 +4,9 @@ import android.Manifest
 import android.app.Activity
 import android.app.WallpaperManager
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -17,18 +19,16 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.lifecycleScope
-import coil.Coil
-import coil.ImageLoader
-import com.bumptech.glide.Glide
+import androidx.lifecycle.Observer
+import androidx.viewpager.widget.ViewPager
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -36,45 +36,49 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.material.snackbar.Snackbar
 import com.yalantis.ucrop.UCrop
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import xyz.nagdibai.superwallpapers.PrefData.Keys.FIRST_RUN_REVIEW_DONE
-import xyz.nagdibai.superwallpapers.databinding.PhotoWindowBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import xyz.nagdibai.superwallpapers.databinding.PhotoWindowSlideBinding
 import java.io.*
+import java.util.*
+import kotlin.concurrent.schedule
 
-const val TAG = "PhotoWindow"
+
+const val TAG = "Nagdi"
 
 class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
-    private lateinit var bnd: PhotoWindowBinding
+    private lateinit var bnd: PhotoWindowSlideBinding
 
     private lateinit var mAdView : AdView
-    private lateinit var imgURL : String
-    private lateinit var keywords : String
-    private var downloads = 0
-    private lateinit var category: String
+    private var startIdx = 0
+    private lateinit var itemsList: ArrayList<ChitraItem>
+    private lateinit var favList: ArrayList<ChitraItem>
 
-    private var isFavorite = false
-    private var rewardAdShown = false
-    private var showCropperAfterRewardAd = false
+    private var cacheDBinMem = true
 
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var resultLauncher: ActivityResultLauncher<Intent>
-    private lateinit var imageLoader: ImageLoader
     private var mRewardedAd: RewardedAd? = null
     private var mInterstitialAd: InterstitialAd? = null
     private lateinit var options: UCrop.Options
     private val favViewModel: FavViewModel by viewModels {
         FavViewModelFactory((application as FavApp).repository)
     }
+    private lateinit var sharedPref: SharedPreferences
+
+    private lateinit var viewPager: ViewPager
+    private lateinit var viewPagerAdapter: ViewPagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super<AppCompatActivity>.onCreate(savedInstanceState)
-        bnd = PhotoWindowBinding.inflate(layoutInflater)
+        bnd = PhotoWindowSlideBinding.inflate(layoutInflater)
         setContentView(bnd.root)
 
         initAdsAndBanner()
-        setImageViewAndUI()
+        setViewPager()
         setButtons()
         loadRewardAd()
         loadFullPageAd()
@@ -91,43 +95,62 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
         mAdView.loadAd(adRequest)
     }
 
-    private fun setImageViewAndUI() {
-        imgURL = intent.getStringExtra("link")!!
-        keywords = intent.getStringExtra("keywords")!!
-        downloads = intent.getIntExtra("downloads", 0)
-        category = intent.getStringExtra("category")!!
-        Glide.with(baseContext)
-            .load(imgURL)
-            .into(bnd.ivPhoto)
+    private fun setViewPager () {
+        itemsList = intent.getSerializableExtra("ItemsList") as ArrayList<ChitraItem>
+        favList = ArrayList()
+        favViewModel.allFavs.observe(this, Observer { favItems ->
+            // Update the cached copy of the words in the adapter.
+            if (cacheDBinMem) {
+                favItems?.let {
+                    favItems.forEach {
+                        favList.add(ChitraItem(it._id, it.category, it.downloads, it.keywords, it.link))
+                    }
+                }
+                cacheDBinMem = false;
+            }
+        })
+        sharedPref = this.getSharedPreferences("pref_s@|t", Context.MODE_PRIVATE)
+        startIdx = intent.getIntExtra("StartIdx", 0)
+        viewPager = bnd.vpPhoto
+        viewPagerAdapter = ViewPagerAdapter(itemsList, this@PhotoWindow)
+        viewPager.adapter = viewPagerAdapter
+        viewPagerAdapter.notifyDataSetChanged()
+        viewPager.currentItem = startIdx
 
-        favViewModel.setFliterQuery(imgURL)
+        favViewModel.setFliterQuery(getImgUrl())
         favViewModel.dataToUi.observe(this) { result ->
             result?.apply {
                 bnd.fabFavorite.setImageResource(R.drawable.ic_baseline_favorite_24)
-                isFavorite = true
-                Log.d(TAG, result.link)
             }
         }
-        imageLoader = Coil.imageLoader(this)
+        viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+
+            override fun onPageScrollStateChanged(state: Int) { }
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) { }
+            override fun onPageSelected(position: Int) {
+                if(favList.any{ it.link == itemsList[position].link }){
+                    bnd.fabFavorite.setImageResource(R.drawable.ic_baseline_favorite_24)
+                } else {
+                    bnd.fabFavorite.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+                }
+            }
+        })
+
+        downloadTokenUpdate()
+
     }
 
     private fun setButtons() {
         bnd.backBtn.setOnClickListener {
             this.finish()
         }
+
         bnd.fabFavorite.setOnClickListener {
-            if (isFavorite){
-                bnd.fabFavorite.setImageResource(R.drawable.ic_baseline_favorite_border_24)
-                isFavorite = false
-                favViewModel.delete(imgURL)
-            } else {
-                bnd.fabFavorite.setImageResource(R.drawable.ic_baseline_favorite_24)
-                isFavorite = true
-                favViewModel.insert(Favorite(category, downloads, keywords, imgURL))
-            }
+            addToFavorites()
         }
 
         bnd.fabDownload.setOnClickListener {
+            bnd.fabDownloadRemaining.bringToFront()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 downloadPhoto()
             } else {
@@ -136,12 +159,33 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
         }
 
         bnd.fabApply.setOnClickListener {
-            cropAndApply()
+            bnd.frameProgress.visibility = View.VISIBLE
+            bnd.loadingCircle.visibility = View.VISIBLE
+            Timer().schedule(100){
+                cropAndApply()
+            }
         }
     }
 
+    private fun getImgUrl(posi: Int = viewPager.currentItem) : String {
+        return itemsList[posi].link
+    }
+    private fun getKeywords() : String {
+        return itemsList[viewPager.currentItem].keywords
+    }
+    private fun getId() : String {
+        return itemsList[viewPager.currentItem]._id
+    }
+    private fun getCategory() : String {
+        return itemsList[viewPager.currentItem].category
+    }
+    private fun getDownloads() : Int {
+        return itemsList[viewPager.currentItem].downloads
+    }
+
     private fun cropAndApply() {
-        val bitmap = (bnd.ivPhoto.drawable as BitmapDrawable).bitmap
+        val currViewPage: ImageView = bnd.vpPhoto.findViewWithTag("viewPagerIvPhoto" + viewPager.currentItem)
+        val bitmap = (currViewPage.drawable as BitmapDrawable).bitmap
         val cacheDir = baseContext.cacheDir
         val f = File(cacheDir, "pic")
 
@@ -169,7 +213,6 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
             .getIntent(this)
 
         resultLauncher.launch(cropper)
-
     }
 
     private fun setActivityCallback() {
@@ -193,9 +236,13 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
             }
 
         resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            bnd.frameProgress.visibility = View.INVISIBLE
+            bnd.loadingCircle.visibility = View.INVISIBLE
             if (result.resultCode == Activity.RESULT_OK) {
                 val data: Intent? = result.data
                 var resultUri: Uri? = data?.let { UCrop.getOutput(it) };
+                bnd.frameProgress.visibility = View.INVISIBLE
+                bnd.loadingCircle.visibility = View.INVISIBLE
                 if (resultUri != null) {
                     applyWallpaper(resultUri)
                 } else {
@@ -231,7 +278,8 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
     }
 
     private fun saveMediaToStorage() {
-        val bitmap = (bnd.ivPhoto.drawable as BitmapDrawable).bitmap
+        val currViewPage: ImageView = bnd.vpPhoto.findViewWithTag("viewPagerIvPhoto" + viewPager.currentItem)
+        val bitmap = (currViewPage.drawable as BitmapDrawable).bitmap
         val filename = "${System.currentTimeMillis()}.jpg"
         var fos: OutputStream? = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -254,37 +302,41 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
         fos?.use {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
 
-            val firstRunCheck: Flow<Boolean> = dataStore.data
-                .map { preferences -> preferences[FIRST_RUN_REVIEW_DONE] ?: true }
+            val firstRun = sharedPref.getBoolean(FIRST_DOWNLOAD, true)
 
             val snack = Snackbar.make(bnd.clPhoto, "Wallpaper downloaded to your Gallery", Snackbar.LENGTH_INDEFINITE)
             snack.setAction("OK", View.OnClickListener {
                 Log.d(TAG, "Download complete dialog dismissed")
-                lifecycleScope.launch {
-                    firstRunCheck.collect() { firstRun ->
-                        if (firstRun) {
-                            showDialog(
-                                "Go Ad Free ?",
-                                "Remove the ads by giving us a review on Play Store",
-                                "Rate App"
-                            ) {
-                                val packageName = this@PhotoWindow.packageName
-                                val browserIntent = Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
-                                )
-                                startActivity(browserIntent)
-                            }
-                            dataStore.edit { prefs -> prefs[FIRST_RUN_REVIEW_DONE] = false }
-                        }
+                if (firstRun) {
+                    showDialog(
+                        "Loving the App ?",
+                        "help us reach more people by giving us a review",
+                        "Rate App",
+                    "Later"
+                    ) {
+                        val packageName = this@PhotoWindow.packageName
+                        val browserIntent = Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+                        )
+                        startActivity(browserIntent)
+                    }
+                    with (sharedPref.edit()) {
+                        putBoolean(FIRST_DOWNLOAD, false)
+                        commit()
                     }
                 }
             })
+
             snack.setTextColor(Color.BLACK)
             snack.setActionTextColor(Color.BLACK)
-            snack.setBackgroundTint(Color.GREEN)
+            snack.setBackgroundTint(Color.rgb(42,202,234))
             snack.anchorView = bnd.bannerAdPhotoWindow
             snack.show()
+            downloadIncrement()
+            if (mInterstitialAd != null) {
+                mInterstitialAd?.show(this@PhotoWindow)
+            }
         }
     }
 
@@ -317,7 +369,7 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
             })
             snack.setTextColor(Color.BLACK)
             snack.setActionTextColor(Color.BLACK)
-            snack.setBackgroundTint(Color.GREEN)
+            snack.setBackgroundTint(Color.rgb(42,202,234))
             snack.anchorView = bnd.bannerAdPhotoWindow
             snack.show()
             if(mInterstitialAd != null) {
@@ -329,27 +381,103 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
         }
     }
 
-    private fun downloadPhoto() {
-        if (mRewardedAd != null && !rewardAdShown) {
-            showDialog(
-                "Download",
-                "Watch an ad to download the wallpaper to your Gallery?",
-                "Ok",
-                "Cancel"
-            ) {
-                mRewardedAd?.show(this, OnUserEarnedRewardListener {
-                    Log.d(TAG, "User earned the reward for download.")
-                    saveMediaToStorage()
-                })
-                rewardAdShown = true;
+    private fun downloadIncrement() {
+
+        val api = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(WallyApi::class.java)
+
+        val call = api.downloadInc(getString(R.string.collection), "${itemsList[viewPager.currentItem]._id}")
+
+        call.enqueue(object : Callback<ChitraItemAPI> {
+            override fun onResponse(call: Call<ChitraItemAPI>, response: Response<ChitraItemAPI>) {
+                if (response.code() == 200) {
+                    val data = response.body()!!
+                    Log.d(TAG, "Downloads incremented to - " + data.downloads)
+                } else if (response.code() == 400) {
+                    Toast.makeText(this@PhotoWindow, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
+                    Log.e(TAG, "API failed 400")
+                } else if (response.code() == 500) {
+                    Toast.makeText(this@PhotoWindow, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
+                    Log.e(TAG, "API failed 500")
+                }
             }
-        } else if(mInterstitialAd != null) {
-            mInterstitialAd?.show(this)
-            saveMediaToStorage()
+
+            override fun onFailure(call: Call<ChitraItemAPI>, t: Throwable) {
+                Toast.makeText(this@PhotoWindow, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
+
+            }
+        })
+
+    }
+
+    private fun downloadPhoto() {
+        val downloadsRemaining = sharedPref.getInt(DOWNLOADS_REMAINING, 0)
+
+        if (downloadsRemaining == 0) {
+            if (mRewardedAd != null) {
+                // TODO: Sentence reconstruction
+                showDialog(
+                    "Unlock Download",
+                    "Watch a video ad to unlock 3 downloads",
+                    "Ok",
+                    "Cancel"
+                ) {
+                    mRewardedAd?.show(this@PhotoWindow, OnUserEarnedRewardListener {
+                        Log.d(TAG, "User earned the reward for download.")
+
+                        // TODO: Sentence reconstruction
+                        val snack = Snackbar.make(bnd.clPhoto, "You are rewarded $DOWNLOADS_REWARDED download tokens ${getEmoji(HEART_EYES_EMOJI)}", Snackbar.LENGTH_INDEFINITE)
+                        snack.setAction("OK", View.OnClickListener {
+                            Log.d(TAG, "Wallpaper reward dialog dismissed")
+                        })
+                        snack.setTextColor(Color.BLACK)
+                        snack.setActionTextColor(Color.BLACK)
+                        snack.setBackgroundTint(Color.GREEN)
+                        snack.anchorView = bnd.bannerAdPhotoWindow
+                        snack.show()
+                        with (sharedPref.edit()) {
+                            putInt("downloadsRemaining", DOWNLOADS_REWARDED)
+                            commit()
+                        }
+                        downloadTokenUpdate(3)
+                    })
+                }
+            } else {
+                // TODO: Sentence reconstruction
+                showDialog(
+                    "Ad not loaded",
+                    "You have to watch an ad to get download tokens. Please try again in a few seconds. " +
+                            "\n\nTIP${getEmoji(STAR_EMOJI)} : You can add the wallpaper to Favorites",
+                    "Add To Favorites",
+                    "Wait"
+                ) {
+                    addToFavorites()
+                }
+            }
         } else {
-            Log.d(TAG, "Ads not loaded but download allowed")
-            Log.d(TAG, "Ads not loaded but download allowed")
+            with (sharedPref.edit()) {
+                putInt("downloadsRemaining", downloadsRemaining - 1)
+                commit()
+                downloadTokenUpdate(downloadsRemaining - 1)
+            }
+            Log.d(TAG, "Download allowed")
             saveMediaToStorage()
+        }
+    }
+
+    private fun addToFavorites() {
+        if (favList.any{ it.link == itemsList[viewPager.currentItem].link }){
+            bnd.fabFavorite.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+            favViewModel.delete(getImgUrl())
+            val index = favList.indexOfFirst{ it.link == itemsList[viewPager.currentItem].link }
+            favList.removeAt(index)
+        } else {
+            bnd.fabFavorite.setImageResource(R.drawable.ic_baseline_favorite_24)
+            favViewModel.insert(Favorite(getId(), getCategory(), getDownloads(), getKeywords(), getImgUrl()))
+            favList.add(ChitraItem(getId(), getCategory(), getDownloads(), getKeywords(), getImgUrl()))
         }
     }
 
@@ -370,26 +498,24 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
                 override fun onAdLoaded(rewardedAd: RewardedAd) {
                     Log.d(TAG, "Ad was loaded.")
                     mRewardedAd = rewardedAd
+
+                    mRewardedAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+                        override fun onAdShowedFullScreenContent() {
+                            Log.d(TAG, "Ad was shown.")
+                        }
+
+                        override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+                            Log.d(TAG, "Ad failed to show.")
+                            Toast.makeText(this@PhotoWindow, "Failed to show ad", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun onAdDismissedFullScreenContent() {
+                            Log.d(TAG, "Ad dismissed whether or not seen entirely")
+                            loadRewardAd()
+                        }
+                    }
                 }
             })
-
-        mRewardedAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdShowedFullScreenContent() {
-                Log.d(TAG, "Ad was shown.")
-            }
-
-            override fun onAdFailedToShowFullScreenContent(p0: AdError) {
-                Log.d(TAG, "Ad failed to show.")
-                Toast.makeText(this@PhotoWindow, "Failed to show ad", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onAdDismissedFullScreenContent() {
-                Log.e("Chumbhan", "Ad was dismissed.")
-                mRewardedAd = null
-            }
-
-        }
-
     }
 
     private fun loadFullPageAd() {
@@ -400,14 +526,23 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 Log.d(TAG, adError?.message)
                 mInterstitialAd = null
+                loadFullPageAd()
             }
-
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
                 Log.d(TAG, "Full page Ad was loaded.")
                 mInterstitialAd = interstitialAd
+                mInterstitialAd?.fullScreenContentCallback = object: FullScreenContentCallback() {
+                    override fun onAdDismissedFullScreenContent() {
+                        Log.d(TAG, "Ad was dismissed.")
+                        loadFullPageAd()
+                    }
+                    override fun onAdShowedFullScreenContent() {
+                        Log.d(TAG, "Ad showed fullscreen content.")
+                        mInterstitialAd = null
+                    }
+                }
             }
         })
-
     }
 
     private fun setUpUCrop () {
@@ -418,6 +553,19 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
         options.setStatusBarColor(ContextCompat.getColor(this, android.R.color.white))
         options.setActiveControlsWidgetColor(ContextCompat.getColor(this, android.R.color.black))
         options.setToolbarWidgetColor(ContextCompat.getColor(this, android.R.color.black))
+    }
+
+    private fun downloadTokenUpdate(downloads: Int = -1){
+        var downloadsRemaining = downloads
+        if(downloadsRemaining == -1) {
+            downloadsRemaining = sharedPref.getInt(DOWNLOADS_REMAINING, 0)
+        }
+        if (downloadsRemaining != 0) {
+            bnd.fabDownloadRemaining.text = "$downloadsRemaining"
+            bnd.fabDownloadRemaining.visibility = View.VISIBLE
+        } else {
+            bnd.fabDownloadRemaining.visibility = View.INVISIBLE
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

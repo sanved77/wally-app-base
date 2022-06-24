@@ -63,10 +63,8 @@ internal class PhotoShelfAdapter(private var itemsList: ArrayList<ChitraItem>, p
             .into(holder.itemImageView)
         holder.itemImageView.setOnClickListener {
             val intent = Intent(context, PhotoWindow::class.java)
-            intent.putExtra("category", item.category)
-            intent.putExtra("downloads", item.downloads)
-            intent.putExtra("link", item.link)
-            intent.putExtra("keywords", item.keywords)
+            intent.putExtra("StartIdx", position)
+            intent.putExtra("ItemsList", itemsList)
             context.startActivity(intent)
         }
     }

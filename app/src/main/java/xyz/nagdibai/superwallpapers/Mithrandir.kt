@@ -13,6 +13,7 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.core.view.WindowCompat
 
+
 fun hideSystemUI(window: Window) {
     // Enables regular immersive mode
     if (Build.VERSION.SDK_INT in 21..29) {
@@ -80,4 +81,8 @@ fun Context.showDialog(
 fun Context.hideKeyboard(view: View) {
     val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
+fun getEmoji(unicode: Int): String {
+    return String(Character.toChars(unicode))
 }

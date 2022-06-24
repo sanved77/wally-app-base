@@ -18,17 +18,16 @@
         app:layout_constraintTop_toTopOf="parent">
 
 
-        <ImageView
-            android:id="@+id/ivPhoto"
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/vpPhoto"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            tools:srcCompat="@drawable/bikini" />
+            app:layout_constraintTop_toTopOf="parent">
+
+        </androidx.viewpager.widget.ViewPager>
 
         <ImageButton
             android:id="@+id/backBtn"
@@ -55,24 +54,55 @@
             app:layout_constraintBottom_toTopOf="@+id/fabDownload"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_baseline_favorite_border_24"
-            app:tint="@color/favRed">
+            app:tint="@color/favRed"></com.google.android.material.floatingactionbutton.FloatingActionButton>
 
-        </com.google.android.material.floatingactionbutton.FloatingActionButton>
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <LinearLayout
             android:id="@+id/fabDownload"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/white"
+            android:background="@drawable/circle_shape"
+            app:borderWidth="0dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/fabApply"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_baseline_cloud_download_24"
+                ></ImageView>
+
+        </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fabDownloadRemaining"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:backgroundTint="@color/favRed"
+            android:gravity="center"
+            android:paddingStart="0dp"
+
+            android:paddingLeft="0dp"
+            android:paddingTop="0dp"
+            android:paddingEnd="0dp"
+            android:paddingRight="0dp"
+            android:paddingBottom="0dp"
+            android:text="3"
+            android:textColor="@color/white"
+            android:textSize="15dp"
             android:theme="@style/Theme.FAB"
             app:borderWidth="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/fabApply"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_baseline_cloud_download_24">
+            app:layout_constraintBottom_toBottomOf="@+id/fabDownload"
+            app:layout_constraintEnd_toEndOf="@+id/fabDownload"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/fabDownload"
+            app:layout_constraintTop_toTopOf="@+id/fabDownload"
+            app:layout_constraintVertical_bias="1.0">
 
-        </com.google.android.material.floatingactionbutton.FloatingActionButton>
+        </com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabApply"
@@ -106,5 +136,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clPhoto" />
 
+    <!--  Using this as a grey overlay for progress -->
+    <FrameLayout
+        android:id="@+id/frameProgress"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:foreground="#98222f3e"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/bannerAdPhotoWindow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/clPhoto">
+
+    </FrameLayout>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/loadingCircle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        app:indicatorSize="100dp"
+        app:layout_constraintBottom_toBottomOf="@+id/clPhoto"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/clPhoto"
+        app:trackThickness="10dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

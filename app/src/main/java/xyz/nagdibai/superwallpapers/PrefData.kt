@@ -10,7 +10,7 @@ val Context.dataStore by preferencesDataStore("user_preferences_hNG2rf3gY5hK")
 class PrefData(context: Context) {
     object Keys {
         val FIRST_RUN_REVIEW_DONE = booleanPreferencesKey("first_run_review_done")
-        val TEST = intPreferencesKey("dhuski")
+        val NO_OF_DOWNLOADS = intPreferencesKey("no_of_downloads")
     }
     val dataStore = context.dataStore
 }

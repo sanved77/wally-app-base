@@ -97,6 +97,7 @@ class MainActivity : AppCompatActivity() {
                         if (i in 0..4)
                             popularItemsList.add(
                                 ChitraItem(
+                                    popularSorted[i]._id,
                                     popularSorted[i].category,
                                     popularSorted[i].downloads,
                                     popularSorted[i].keywords,
@@ -106,6 +107,7 @@ class MainActivity : AppCompatActivity() {
                         if (!categoryMap.containsKey(data[i].category))
                             categoryMap[data[i].category] = ArrayList<ChitraItem>()
                         var tempChitra = ChitraItem(
+                            data[i]._id,
                             data[i].category,
                             data[i].downloads,
                             data[i].keywords,
@@ -119,6 +121,7 @@ class MainActivity : AppCompatActivity() {
                     categoryMap.forEach {
                         categoryItemsList.add(
                             ChitraItem(
+                                it.value[0]._id,
                                 it.key,
                                 it.value[0].downloads,
                                 it.value[0].keywords,
@@ -151,6 +154,7 @@ class MainActivity : AppCompatActivity() {
                 fav.forEach {
                     favoriteItemsList.add(
                         ChitraItem(
+                            it._id,
                             it.category,
                             it.downloads,
                             it.keywords,

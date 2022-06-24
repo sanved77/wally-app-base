@@ -13,7 +13,7 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 
 
-internal class PopularListAdapter(private var itemsList: List<ChitraItem>, private var context: Context, private var height: Int) :
+internal class PopularListAdapter(private var itemsList: ArrayList<ChitraItem>, private var context: Context, private var height: Int) :
     RecyclerView.Adapter<PopularListAdapter.MyViewHolder>() {
     internal inner class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var itemImageView: ImageView = view.findViewById(R.id.ivPopListItem)
@@ -47,10 +47,9 @@ internal class PopularListAdapter(private var itemsList: List<ChitraItem>, priva
 
         holder.itemImageView.setOnClickListener {
             val intent = Intent(context, PhotoWindow::class.java)
-            intent.putExtra("category", item.category)
-            intent.putExtra("downloads", item.downloads)
-            intent.putExtra("link", item.link)
-            intent.putExtra("keywords", item.keywords)
+            intent.putExtra("StartIdx", position)
+            intent.putExtra("ItemsList", itemsList)
+
             context.startActivity(intent)
         }
     }
