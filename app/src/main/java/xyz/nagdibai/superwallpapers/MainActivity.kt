@@ -3,6 +3,7 @@ package xyz.nagdibai.superwallpapers
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
@@ -118,7 +119,9 @@ class MainActivity : AppCompatActivity() {
                         categoryMap[data[i].category]?.add(tempChitra)
                         categoryMap["All"]?.add(tempChitra)
                     }
+
                     popularListAdapter.notifyDataSetChanged()
+                    bnd.tvLoadingPop.visibility = View.GONE
 
                     categoryMap.forEach {
                         categoryItemsList.add(
@@ -133,13 +136,16 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                     categoryListAdapter.notifyDataSetChanged()
+                    bnd.tvLoadingCat.visibility = View.GONE
 
-                } else if (response.code() == 400) {
-                    Toast.makeText(this@MainActivity, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
-                    Log.e("MainActivity", "API failed 400")
-                } else if (response.code() == 500) {
-                    Toast.makeText(this@MainActivity, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
-                    Log.e("MainActivity", "API failed 500")
+                } else {
+                    if (response.code() == 400) {
+                        Toast.makeText(this@MainActivity, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
+                        Log.e("MainActivity", "API failed 400")
+                    } else if (response.code() == 500) {
+                        Toast.makeText(this@MainActivity, API_FAILURE_MSG, Toast.LENGTH_SHORT).show()
+                        Log.e("MainActivity", "API failed 500")
+                    }
                 }
             }
 

@@ -141,6 +141,32 @@
             app:layout_constraintVertical_bias="0.0" />
 
         <TextView
+            android:id="@+id/tvLoadingCat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loading..."
+            android:textSize="32sp"
+            app:layout_constraintBottom_toTopOf="@+id/guidelinePopular_Category"
+            app:layout_constraintEnd_toEndOf="@+id/rvPopular"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/rvPopular">
+
+        </TextView>
+
+        <TextView
+            android:id="@+id/tvLoadingPop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loading..."
+            android:textSize="32sp"
+            app:layout_constraintBottom_toBottomOf="@+id/rvCategories"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/rvCategories">
+
+        </TextView>
+
+        <TextView
             android:id="@+id/categoryHeading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -179,16 +205,17 @@
             app:layout_constraintEnd_toStartOf="@+id/guidelineSavedRightBound"
             app:layout_constraintStart_toStartOf="@+id/guidelineSavedLeftBound"
             app:layout_constraintTop_toBottomOf="@+id/rvCategories">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingVertical="10dp"
-                android:textSize="20sp"
                 android:layout_gravity="center"
                 android:drawableLeft="@drawable/ic_baseline_favorite_24_white"
                 android:drawablePadding="10dp"
+                android:paddingVertical="10dp"
                 android:text="FAVORITES"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="20sp" />
         </FrameLayout>
 
         <androidx.constraintlayout.widget.Guideline
@@ -205,29 +232,29 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.85" />
 
-<!--                Fading background with arrow to show that you can scroll -->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="0dp"-->
-<!--                    android:background="@drawable/fade_color"-->
-<!--                    android:gravity="center"-->
-<!--                    android:orientation="vertical"-->
-<!--                    android:paddingRight="8dp"-->
-<!--                    android:paddingLeft="8dp"-->
-<!--                    app:layout_constraintBottom_toTopOf="@+id/guideline5"-->
-<!--                    app:layout_constraintEnd_toEndOf="@+id/rvPopular"-->
-<!--                    app:layout_constraintHorizontal_bias="1.0"-->
-<!--                    app:layout_constraintStart_toStartOf="parent"-->
-<!--                    app:layout_constraintTop_toTopOf="@+id/rvPopular">-->
+        <!--                Fading background with arrow to show that you can scroll -->
+        <!--                <LinearLayout-->
+        <!--                    android:layout_width="wrap_content"-->
+        <!--                    android:layout_height="0dp"-->
+        <!--                    android:background="@drawable/fade_color"-->
+        <!--                    android:gravity="center"-->
+        <!--                    android:orientation="vertical"-->
+        <!--                    android:paddingRight="8dp"-->
+        <!--                    android:paddingLeft="8dp"-->
+        <!--                    app:layout_constraintBottom_toTopOf="@+id/guideline5"-->
+        <!--                    app:layout_constraintEnd_toEndOf="@+id/rvPopular"-->
+        <!--                    app:layout_constraintHorizontal_bias="1.0"-->
+        <!--                    app:layout_constraintStart_toStartOf="parent"-->
+        <!--                    app:layout_constraintTop_toTopOf="@+id/rvPopular">-->
 
-<!--                    <ImageView-->
-<!--                        android:id="@+id/imageView"-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
+        <!--                    <ImageView-->
+        <!--                        android:id="@+id/imageView"-->
+        <!--                        android:layout_width="match_parent"-->
+        <!--                        android:layout_height="wrap_content"-->
 
-<!--                        app:srcCompat="@drawable/ic_baseline_chevron_right_24" />-->
+        <!--                        app:srcCompat="@drawable/ic_baseline_chevron_right_24" />-->
 
-<!--                </LinearLayout>-->
+        <!--                </LinearLayout>-->
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
