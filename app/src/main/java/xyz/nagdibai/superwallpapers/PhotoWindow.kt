@@ -103,7 +103,7 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
             if (cacheDBinMem) {
                 favItems?.let {
                     favItems.forEach {
-                        favList.add(ChitraItem(it._id, it.category, it.downloads, it.keywords, it.link))
+                        favList.add(ChitraItem(it._id, it.category, it.subCategory, it.downloads, it.keywords, it.link))
                     }
                 }
                 cacheDBinMem = false;
@@ -178,6 +178,9 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
     }
     private fun getCategory() : String {
         return itemsList[viewPager.currentItem].category
+    }
+    private fun getSubCategory() : String {
+        return itemsList[viewPager.currentItem].subCategory
     }
     private fun getDownloads() : Int {
         return itemsList[viewPager.currentItem].downloads
@@ -476,8 +479,8 @@ class PhotoWindow : AppCompatActivity(), DefaultLifecycleObserver  {
             favList.removeAt(index)
         } else {
             bnd.fabFavorite.setImageResource(R.drawable.ic_baseline_favorite_24)
-            favViewModel.insert(Favorite(getId(), getCategory(), getDownloads(), getKeywords(), getImgUrl()))
-            favList.add(ChitraItem(getId(), getCategory(), getDownloads(), getKeywords(), getImgUrl()))
+            favViewModel.insert(Favorite(getId(), getCategory(), getSubCategory(), getDownloads(), getKeywords(), getImgUrl()))
+            favList.add(ChitraItem(getId(), getCategory(), getSubCategory(), getDownloads(), getKeywords(), getImgUrl()))
         }
     }
 

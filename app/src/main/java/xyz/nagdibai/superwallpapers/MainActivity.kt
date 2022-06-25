@@ -99,6 +99,7 @@ class MainActivity : AppCompatActivity() {
                                 ChitraItem(
                                     popularSorted[i]._id,
                                     popularSorted[i].category,
+                                    popularSorted[i].subCategory,
                                     popularSorted[i].downloads,
                                     popularSorted[i].keywords,
                                     popularSorted[i].link
@@ -109,6 +110,7 @@ class MainActivity : AppCompatActivity() {
                         var tempChitra = ChitraItem(
                             data[i]._id,
                             data[i].category,
+                            data[i].subCategory,
                             data[i].downloads,
                             data[i].keywords,
                             data[i].link
@@ -123,6 +125,7 @@ class MainActivity : AppCompatActivity() {
                             ChitraItem(
                                 it.value[0]._id,
                                 it.key,
+                                it.value[0].subCategory,
                                 it.value[0].downloads,
                                 it.value[0].keywords,
                                 it.value[0].link
@@ -156,6 +159,7 @@ class MainActivity : AppCompatActivity() {
                         ChitraItem(
                             it._id,
                             it.category,
+                            it.subCategory,
                             it.downloads,
                             it.keywords,
                             it.link

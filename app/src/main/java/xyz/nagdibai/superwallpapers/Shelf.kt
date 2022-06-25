@@ -1,10 +1,7 @@
 package xyz.nagdibai.superwallpapers
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.doOnLayout
 import androidx.recyclerview.widget.GridLayoutManager
@@ -39,7 +36,6 @@ class Shelf : AppCompatActivity() {
         setFancyStuff()
         setPhotoShelf()
         initAdsAndBanner()
-        setUpSearch()
 
     }
 
@@ -77,8 +73,8 @@ class Shelf : AppCompatActivity() {
         val rvPhotoShelf: RecyclerView = bnd.rvPhotoShelf;
         rvPhotoShelf.doOnLayout {
             imgWidth = it.measuredWidth
-            rvPhotoShelf.layoutManager = GridLayoutManager(applicationContext,4)
-            photoShelfAdapter = photoList?.let { it1 -> PhotoShelfAdapter(it1, this, (imgWidth/4)) }!!
+            rvPhotoShelf.layoutManager = GridLayoutManager(applicationContext,NO_OF_ITEMS_IN_SHELF_GRID)
+            photoShelfAdapter = photoList?.let { it1 -> PhotoShelfAdapter(it1, this, (imgWidth/NO_OF_ITEMS_IN_SHELF_GRID)) }!!
             rvPhotoShelf.adapter = photoShelfAdapter
         }
     }
@@ -89,60 +85,6 @@ class Shelf : AppCompatActivity() {
         mAdView = bnd.bannerShelf
         val adRequest = AdRequest.Builder().build()
         mAdView.loadAd(adRequest)
-    }
-
-    private fun setUpSearch() {
-        if(searchTerm != ""){
-            bnd.etSearch.setText(searchTerm)
-            bnd.etSearch.setSelection(bnd.etSearch.length())
-        }
-        bnd.etSearch.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                searchThisShit()
-                return@OnEditorActionListener true
-            }
-            false
-        })
-        bnd.btnSearch.setOnClickListener {
-            searchThisShit()
-        }
-    }
-
-    private fun searchThisShit() {
-        bnd.tvNoMsg.visibility = View.GONE
-        hideKeyboard(currentFocus ?: View(this))
-        var term = bnd.etSearch.text.toString()
-        term = term.lowercase().replace(" ", "")
-        term = regex.replace(term, "")
-
-        if (term == "") {
-            bnd.etSearch.error = "Enter something to search"
-        } else {
-            val searchResultList = ArrayList<ChitraItem>()
-
-            allPhotoList?.forEach {
-                if (it.keywords.contains(term)) {
-                    searchResultList.add(it)
-                }
-            }
-
-            if (selfRender!!) {
-                photoList.clear();
-                if (searchResultList.size == 0) {
-                    bnd.tvNoMsg.visibility = View.VISIBLE
-                }
-                photoList.addAll(searchResultList)
-                photoShelfAdapter.notifyDataSetChanged()
-            } else {
-                val intent = Intent(this, Shelf::class.java)
-                intent.putExtra("CategoryLabel", "Search")
-                intent.putExtra("SelfRender", true)
-                intent.putExtra("SearchTerm", term)
-                intent.putExtra("Wallies", searchResultList)
-                intent.putExtra("AllWallies", allPhotoList)
-                startActivity(intent)
-            }
-        }
     }
 
 }

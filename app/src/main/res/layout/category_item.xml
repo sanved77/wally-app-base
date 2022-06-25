@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/llPhotoHolder"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <RelativeLayout
+        android:orientation="vertical"
+        android:id="@+id/catItemCard"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:foreground="#80222f3e"
+            android:foregroundTintMode="src_atop"
+            android:id="@+id/ivPopListItem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="center"/>
+
+        <TextView
+
+            android:id="@+id/tvLabel"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:background="@color/black"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="Dhuski"
+            android:textColor="@color/white"
+            android:textSize="22sp"></TextView>
+
+    </RelativeLayout>
+</LinearLayout>
+

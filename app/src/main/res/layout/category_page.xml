@@ -12,12 +12,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.12" />
+        app:layout_constraintGuide_percent="0.18" />
 
     <ImageView
         android:id="@+id/fancyImage"
         android:layout_width="0dp"
         android:layout_height="0dp"
+
         android:foreground="#90222f3e"
         android:foregroundTintMode="src_atop"
         android:scaleType="centerCrop"
@@ -48,18 +49,58 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="24dp"
+        android:layout_marginTop="36dp"
         android:background="@drawable/top_left_nav_btn"
-        app:layout_constraintBottom_toTopOf="@+id/guidelineFancy_Shelf"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_arrow_back_24"
         tools:ignore="SpeakableTextPresentCheck" />
 
+    <LinearLayout
+        android:id="@+id/searchLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineFancy_Shelf"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fancyText"
+        app:layout_constraintVertical_bias="0.75">
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="250dp"
+            android:layout_height="36dp"
+            android:background="@drawable/search"
+            android:ems="10"
+            android:textCursorDrawable="@null"
+            android:imeOptions="actionSearch"
+            android:hint="Search in Nature"
+            android:inputType="text"
+            android:paddingLeft="8dp"
+            android:paddingRight="16dp"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btnSearch"
+            android:layout_width="48dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="4dp"
+            android:background="@drawable/search"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/ic_baseline_search_24"
+            tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck">
+
+        </androidx.appcompat.widget.AppCompatImageButton>
+
+    </LinearLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/holderConstraintLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-
+        android:background="@drawable/rounded_shape"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -68,13 +109,32 @@
         app:layout_constraintVertical_bias="1.0">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvPhotoShelf"
-            android:layout_width="411dp"
+            android:id="@+id/rvCategoryShelf"
+            android:layout_width="0dp"
             android:layout_height="0dp"
+
             app:layout_constraintBottom_toTopOf="@+id/bannerShelf"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/btnClearSearch" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClearSearch"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:backgroundTint="@color/favBlue"
+            android:text="Clear Filter"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:gravity="center"
+            app:cornerRadius="0dp"
+            android:visibility="gone"
+            app:icon="@drawable/ic_baseline_clear_24"
+            app:iconGravity="textStart"
+            app:layout_constraintBottom_toTopOf="@+id/rvCategoryShelf"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"></com.google.android.material.button.MaterialButton>
 
         <com.google.android.gms.ads.AdView
             android:id="@+id/bannerShelf"
@@ -87,17 +147,17 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rvPhotoShelf" />
+            app:layout_constraintTop_toBottomOf="@+id/rvCategoryShelf" />
 
         <TextView
             android:id="@+id/tvNoMsg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="24sp"
             android:text="No items found !"
+            android:textSize="24sp"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/rvPhotoShelf"
-            app:layout_constraintEnd_toEndOf="@+id/rvPhotoShelf"
+            app:layout_constraintBottom_toBottomOf="@+id/rvCategoryShelf"
+            app:layout_constraintEnd_toEndOf="@+id/rvCategoryShelf"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

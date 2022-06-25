@@ -42,7 +42,7 @@ internal class PhotoShelfAdapter(private var itemsList: ArrayList<ChitraItem>, p
         circularProgressDrawable.centerRadius = 60f
         circularProgressDrawable.start()
         val item = itemsList[position]
-        applyPadding(context, holder.cardParam, if (position%4==3) LAST_POS else POS, 2)
+        applyPadding(context, holder.cardParam, if (position % NO_OF_ITEMS_IN_SHELF_GRID == NO_OF_ITEMS_IN_SHELF_GRID - 1) LAST_POS else POS, 2)
         holder.photoHolderParam.width = width
         holder.photoHolderParam.height = holder.height
         Glide.with(context)

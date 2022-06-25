@@ -29,6 +29,10 @@ package="xyz.nagdibai.superwallpapers">
         android:name="xyz.nagdibai.superwallpapers.Shelf"
         android:exported="true"/>
     <activity
+        android:windowSoftInputMode="stateHidden"
+        android:name="xyz.nagdibai.superwallpapers.CategoryPage"
+        android:exported="true"/>
+    <activity
         android:name="xyz.nagdibai.superwallpapers.PhotoWindow"
         android:exported="true"/>
     <activity

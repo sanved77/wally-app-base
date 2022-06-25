@@ -28,15 +28,17 @@
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/drawable/search.xml" value="0.332" />
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/drawable/top_left_nav_btn.xml" value="0.332" />
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/cat_item_list.xml" value="0.3625" />
+        <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/category_item.xml" value="0.22" />
+        <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/category_page.xml" value="0.2967079948696024" />
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/ggg.xml" value="0.33" />
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/home_main.xml" value="0.2975630611372381" />
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/item.xml" value="0.3625" />
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/photo.xml" value="0.2967079948696024" />
-        <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/photo_item.xml" value="0.3625" />
+        <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/photo_item.xml" value="0.1" />
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/photo_window.xml" value="0.2975630611372381" />
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/photo_window_slide.xml" value="0.33" />
         <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/phto_window.xml" value="0.4221411192214112" />
-        <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/shelf.xml" value="0.2798913043478261" />
+        <entry key="..\:/Code/Wally/wally-app-base/app/src/main/res/layout/shelf.xml" value="0.33" />
       </map>
     </option>
   </component>
